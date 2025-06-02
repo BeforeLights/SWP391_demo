@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { Eye, EyeOff, Heart } from 'lucide-react'
+import { Eye, EyeOff, Brain, Sparkles } from 'lucide-react'
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState('')
@@ -9,6 +9,11 @@ const SignIn: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [animationVisible, setAnimationVisible] = useState(false)
+  
+  useEffect(() => {
+    setAnimationVisible(true)
+  }, [])
   
   const { user, login } = useAuth()
 
@@ -29,32 +34,33 @@ const SignIn: React.FC = () => {
       setLoading(false)
     }
   }
-
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <Heart className="h-12 w-12 text-medical-600" />
+    <div className="min-h-screen hero-bg flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md fade-in">
+        <div className="flex justify-center items-center space-x-2">
+          <Brain className="h-12 w-12 text-brand-600" />
+          <Sparkles className="h-8 w-8 text-ocean-600 animate-pulse" />
         </div>
-        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-          Đăng nhập vào tài khoản
+        <h2 className="mt-6 text-center text-3xl font-bold gradient-text">
+          YOU ARE HEARD
         </h2>
+        <p className="mt-2 text-center text-sm text-gray-600">
+          Hãy đăng nhập để tiếp tục hành trình chăm sóc sức khỏe tinh thần của bạn
+        </p>
         <p className="mt-2 text-center text-sm text-gray-600">
           Hoặc{' '}
           <Link
             to="/signup"
-            className="font-medium text-medical-600 hover:text-medical-500"
+            className="font-medium text-ocean-600 hover:text-ocean-500 gradient-text-hover"
           >
             tạo tài khoản mới
           </Link>
         </p>
-      </div>
-
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      </div>      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md fade-in" style={{ animationDelay: '200ms' }}>
+        <div className="bg-white py-8 px-4 shadow-lg rounded-2xl sm:px-10 border border-slate-100">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
                 {error}
               </div>
             )}
@@ -63,8 +69,7 @@ const SignIn: React.FC = () => {
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Địa chỉ email
               </label>
-              <div className="mt-1">
-                <input
+              <div className="mt-1">                <input
                   id="email"
                   name="email"
                   type="email"
@@ -72,7 +77,7 @@ const SignIn: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-medical-500 focus:border-medical-500 sm:text-sm"
+                  className="form-input"
                   placeholder="your@email.com"
                 />
               </div>
@@ -82,8 +87,7 @@ const SignIn: React.FC = () => {
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Mật khẩu
               </label>
-              <div className="mt-1 relative">
-                <input
+              <div className="mt-1 relative">                <input
                   id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
@@ -91,7 +95,7 @@ const SignIn: React.FC = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-medical-500 focus:border-medical-500 sm:text-sm"
+                  className="form-input pr-10"
                   placeholder="Nhập mật khẩu"
                 />
                 <button
@@ -108,13 +112,12 @@ const SignIn: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
+            <div className="flex items-center justify-between">              <div className="flex items-center">
                 <input
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-medical-600 focus:ring-medical-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-ocean-600 focus:ring-ocean-500 border-gray-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
                   Ghi nhớ đăng nhập
@@ -122,17 +125,16 @@ const SignIn: React.FC = () => {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-medical-600 hover:text-medical-500">
+                <a href="#" className="font-medium text-ocean-600 hover:text-ocean-500 gradient-text-hover">
                   Quên mật khẩu?
                 </a>
               </div>
             </div>
 
-            <div>
-              <button
+            <div>              <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-medical-600 hover:bg-medical-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-medical-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary w-full flex justify-center items-center"
               >
                 {loading ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -151,9 +153,7 @@ const SignIn: React.FC = () => {
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-white text-gray-500">Demo credentials</span>
               </div>
-            </div>
-
-            <div className="mt-4 text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
+            </div>            <div className="mt-4 text-sm text-gray-600 bg-gray-50 p-4 rounded-xl border border-slate-200">
               <p className="font-medium">Tài khoản demo:</p>
               <p>Email: patient@example.com</p>
               <p>Mật khẩu: password123</p>

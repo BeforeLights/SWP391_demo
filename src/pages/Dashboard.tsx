@@ -8,8 +8,9 @@ import {
   AlertTriangle,
   CheckCircle,
   User,
-  Heart,
-  Activity
+  Brain,
+  MessageCircle,
+  Smile
 } from 'lucide-react'
 
 const Dashboard: React.FC = () => {
@@ -23,38 +24,37 @@ const Dashboard: React.FC = () => {
       [medicationId]: !prev[medicationId]
     }))
   }
-
   const upcomingAppointments = [
     {
       id: '1',
-      doctor: 'BS. Nguyễn Thị Hương',
-      specialty: 'HIV/AIDS',
+      doctor: 'ThS. Nguyễn Thị Hương',
+      specialty: 'Tâm lý trị liệu',
       date: '2024-12-15',
       time: '15:00',
-      type: 'Khám định kỳ'
+      type: 'Phiên tư vấn cá nhân'
     },
     {
       id: '2',
-      doctor: 'BS. Trần Văn Nam',
-      specialty: 'Tâm lý',
+      doctor: 'TS. Trần Văn Nam',
+      specialty: 'Tâm lý học lâm sàng',
       date: '2024-12-20',
       time: '10:30',
-      type: 'Tư vấn tâm lý'
+      type: 'Đánh giá tâm lý'
     }
   ]
 
   const medications = [
     {
       id: '1',
-      name: 'TDF + 3TC + DTG',
-      dosage: '1 viên/ngày',
+      name: 'Sertraline',
+      dosage: '50mg/ngày',
       time: '08:00',
       taken: medicationTaken['1'] || false
     },
     {
       id: '2',
       name: 'Vitamin D3',
-      dosage: '1 viên/ngày',
+      dosage: '1000IU/ngày',
       time: '20:00',
       taken: medicationTaken['2'] || false
     }
@@ -63,30 +63,30 @@ const Dashboard: React.FC = () => {
   const recentTests = [
     {
       id: '1',
-      name: 'CD4 Count',
-      value: '450',
-      unit: 'cells/μL',
+      name: 'Đánh giá tâm trạng (PHQ-9)',
+      value: '8',
+      unit: 'điểm',
       date: '2024-11-15',
       status: 'normal',
-      reference: '350-1500'
+      reference: '0-27'
     },
     {
       id: '2',
-      name: 'Viral Load',
-      value: '<50',
-      unit: 'copies/mL',
+      name: 'Mức độ lo âu (GAD-7)',
+      value: '6',
+      unit: 'điểm',
       date: '2024-11-15',
-      status: 'excellent',
-      reference: '<50'
+      status: 'normal',
+      reference: '0-21'
     },
     {
       id: '3',
-      name: 'Hemoglobin',
-      value: '13.2',
-      unit: 'g/dL',
+      name: 'Chất lượng giấc ngủ',
+      value: '7',
+      unit: 'điểm',
       date: '2024-11-10',
-      status: 'normal',
-      reference: '12-16'
+      status: 'excellent',
+      reference: '0-10'
     }
   ]
 
@@ -104,66 +104,65 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">        {/* Header */}
+        <div className="mb-8 animate-fade-in">
+          <h1 className="text-3xl font-bold text-slate-900">
             Chào mừng, {user.name}
           </h1>
-          <p className="text-gray-600">
-            Tổng quan về tình trạng sức khỏe và điều trị của bạn
+          <p className="text-slate-600">
+            Theo dõi hành trình phục hồi sức khỏe tinh thần của bạn
           </p>
         </div>
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="card">
+          <div className="card hover:shadow-lg transition-all duration-300 animate-slide-up" style={{animationDelay: '0.1s'}}>
             <div className="flex items-center">
-              <div className="p-3 bg-green-100 rounded-lg">
-                <Heart className="h-6 w-6 text-green-600" />
+              <div className="p-3 bg-brand-100 rounded-lg">
+                <Brain className="h-6 w-6 text-brand-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">CD4 Count</p>
-                <p className="text-2xl font-semibold text-gray-900">450</p>
-                <p className="text-sm text-green-600">Bình thường</p>
+                <p className="text-sm font-medium text-slate-600">Mức độ tâm trạng</p>
+                <p className="text-2xl font-semibold text-slate-900">Tốt</p>
+                <p className="text-sm text-ocean-600">Cải thiện 15%</p>
               </div>
             </div>
           </div>
 
-          <div className="card">
+          <div className="card hover:shadow-lg transition-all duration-300 animate-slide-up" style={{animationDelay: '0.2s'}}>
             <div className="flex items-center">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Activity className="h-6 w-6 text-blue-600" />
+              <div className="p-3 bg-ocean-100 rounded-lg">
+                <Smile className="h-6 w-6 text-ocean-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Viral Load</p>
-                <p className="text-2xl font-semibold text-gray-900">&lt;50</p>
-                <p className="text-sm text-green-600">Không phát hiện</p>
+                <p className="text-sm font-medium text-slate-600">Mức độ lo âu</p>
+                <p className="text-2xl font-semibold text-slate-900">Thấp</p>
+                <p className="text-sm text-green-600">Giảm 30%</p>
               </div>
             </div>
           </div>
 
-          <div className="card">
+          <div className="card hover:shadow-lg transition-all duration-300 animate-slide-up" style={{animationDelay: '0.3s'}}>
             <div className="flex items-center">
               <div className="p-3 bg-purple-100 rounded-lg">
                 <Pill className="h-6 w-6 text-purple-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Tuân thủ điều trị</p>
-                <p className="text-2xl font-semibold text-gray-900">95%</p>
+                <p className="text-sm font-medium text-slate-600">Tuân thủ điều trị</p>
+                <p className="text-2xl font-semibold text-slate-900">95%</p>
                 <p className="text-sm text-green-600">Xuất sắc</p>
               </div>
             </div>
           </div>
 
-          <div className="card">
+          <div className="card hover:shadow-lg transition-all duration-300 animate-slide-up" style={{animationDelay: '0.4s'}}>
             <div className="flex items-center">
               <div className="p-3 bg-yellow-100 rounded-lg">
                 <Calendar className="h-6 w-6 text-yellow-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Lịch hẹn tiếp theo</p>
-                <p className="text-2xl font-semibold text-gray-900">5</p>
+                <p className="text-sm font-medium text-slate-600">Phiên tư vấn tiếp theo</p>
+                <p className="text-2xl font-semibold text-slate-900">3</p>
                 <p className="text-sm text-yellow-600">ngày nữa</p>
               </div>
             </div>
@@ -172,15 +171,14 @@ const Dashboard: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Medication Schedule */}
-            <div className="card">
+          <div className="lg:col-span-2 space-y-8">            {/* Medication Schedule */}
+            <div className="card animate-slide-up" style={{animationDelay: '0.5s'}}>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                <h2 className="text-xl font-semibold text-slate-900 flex items-center">
                   <Pill className="h-5 w-5 mr-2 text-purple-600" />
-                  Lịch uống thuốc hôm nay
+                  Thuốc và liệu pháp hôm nay
                 </h2>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-slate-500">
                   {new Date().toLocaleDateString('vi-VN')}
                 </span>
               </div>
@@ -223,16 +221,14 @@ const Dashboard: React.FC = () => {
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Recent Test Results */}
-            <div className="card">
+            </div>            {/* Recent Test Results */}
+            <div className="card animate-slide-up" style={{animationDelay: '0.6s'}}>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                  <FileText className="h-5 w-5 mr-2 text-blue-600" />
-                  Kết quả xét nghiệm gần đây
+                <h2 className="text-xl font-semibold text-slate-900 flex items-center">
+                  <FileText className="h-5 w-5 mr-2 text-ocean-600" />
+                  Đánh giá tâm lý gần đây
                 </h2>
-                <button className="text-medical-600 hover:text-medical-700 text-sm font-medium">
+                <button className="text-ocean-600 hover:text-ocean-700 text-sm font-medium">
                   Xem tất cả
                 </button>
               </div>
@@ -241,13 +237,12 @@ const Dashboard: React.FC = () => {
                 {recentTests.map((test) => (
                   <div key={test.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                     <div>
-                      <p className="font-medium text-gray-900">{test.name}</p>
-                      <p className="text-sm text-gray-600">
-                        {test.date} • Tham chiếu: {test.reference}
+                      <p className="font-medium text-gray-900">{test.name}</p>                      <p className="text-sm text-slate-600">
+                        {test.date} • Thang điểm: {test.reference}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-semibold text-gray-900">
+                      <p className="text-lg font-semibold text-slate-900">
                         {test.value} {test.unit}
                       </p>
                       <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(test.status)}`}>
@@ -261,27 +256,25 @@ const Dashboard: React.FC = () => {
                 ))}
               </div>
             </div>
-          </div>
-
-          {/* Right Column */}
+          </div>          {/* Right Column */}
           <div className="space-y-8">
             {/* Upcoming Appointments */}
-            <div className="card">
+            <div className="card animate-slide-up" style={{animationDelay: '0.7s'}}>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                  <Calendar className="h-5 w-5 mr-2 text-green-600" />
-                  Lịch hẹn sắp tới
+                <h2 className="text-xl font-semibold text-slate-900 flex items-center">
+                  <Calendar className="h-5 w-5 mr-2 text-ocean-600" />
+                  Phiên tư vấn sắp tới
                 </h2>
               </div>
               
               <div className="space-y-4">
                 {upcomingAppointments.map((apt) => (
-                  <div key={apt.id} className="p-4 border border-gray-200 rounded-lg">
+                  <div key={apt.id} className="p-4 border border-slate-200 rounded-lg hover:shadow-md transition-shadow">
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="font-medium text-gray-900">{apt.doctor}</p>
-                        <p className="text-sm text-gray-600">{apt.specialty}</p>
-                        <p className="text-sm text-gray-600">{apt.type}</p>
+                        <p className="font-medium text-slate-900">{apt.doctor}</p>
+                        <p className="text-sm text-slate-600">{apt.specialty}</p>
+                        <p className="text-sm text-slate-600">{apt.type}</p>
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-medium text-gray-900">
@@ -319,27 +312,25 @@ const Dashboard: React.FC = () => {
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="card">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Thao tác nhanh</h2>
+            </div>            {/* Quick Actions */}
+            <div className="card animate-slide-up" style={{animationDelay: '0.9s'}}>
+              <h2 className="text-xl font-semibold text-slate-900 mb-6">Thao tác nhanh</h2>
               <div className="space-y-3">
-                <button className="w-full text-left p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center">
-                    <Calendar className="h-5 w-5 text-medical-600 mr-3" />
-                    <span>Đặt lịch hẹn</span>
+                <button className="w-full text-left p-3 rounded-lg hover:bg-slate-50 transition-colors"
+                        onClick={() => window.location.href = '/booking'}>                  <div className="flex items-center">
+                    <Calendar className="h-5 w-5 text-ocean-600 mr-3" />
+                    <span>Đặt phiên tư vấn</span>
                   </div>
                 </button>
-                <button className="w-full text-left p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <button className="w-full text-left p-3 rounded-lg hover:bg-slate-50 transition-colors">
                   <div className="flex items-center">
-                    <FileText className="h-5 w-5 text-medical-600 mr-3" />
-                    <span>Xem báo cáo</span>
+                    <FileText className="h-5 w-5 text-ocean-600 mr-3" />
+                    <span>Xem báo cáo tâm lý</span>
                   </div>
                 </button>
-                <button className="w-full text-left p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <button className="w-full text-left p-3 rounded-lg hover:bg-slate-50 transition-colors">
                   <div className="flex items-center">
-                    <User className="h-5 w-5 text-medical-600 mr-3" />
+                    <User className="h-5 w-5 text-ocean-600 mr-3" />
                     <span>Cập nhật hồ sơ</span>
                   </div>
                 </button>

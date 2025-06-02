@@ -1,60 +1,77 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  BarChart, Bar, PieChart, Pie, Cell 
+  BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area
 } from 'recharts'
 import { 
   Download, Calendar, TrendingUp, TrendingDown, 
-  Activity, FileText, Heart, Pill
+  Activity, FileText, Brain, HeartPulse, Sparkles,
+  SmilePlus, Frown, Sun, MoonStar, CloudRain
 } from 'lucide-react'
 
 // Mock data for charts
-const cd4Data = [
-  { month: 'T1', cd4: 350, target: 500 },
-  { month: 'T2', cd4: 380, target: 500 },
-  { month: 'T3', cd4: 420, target: 500 },
-  { month: 'T4', cd4: 465, target: 500 },
-  { month: 'T5', cd4: 510, target: 500 },
-  { month: 'T6', cd4: 545, target: 500 },
-  { month: 'T7', cd4: 580, target: 500 },
-  { month: 'T8', cd4: 595, target: 500 },
+const anxietyData = [
+  { month: 'T1', anxiety: 75, target: 40 },
+  { month: 'T2', anxiety: 68, target: 40 },
+  { month: 'T3', anxiety: 62, target: 40 },
+  { month: 'T4', anxiety: 55, target: 40 },
+  { month: 'T5', anxiety: 48, target: 40 },
+  { month: 'T6', anxiety: 42, target: 40 },
+  { month: 'T7', anxiety: 38, target: 40 },
+  { month: 'T8', anxiety: 35, target: 40 },
 ]
 
-const viralLoadData = [
-  { month: 'T1', viralLoad: 45000, detectable: 50 },
-  { month: 'T2', viralLoad: 25000, detectable: 50 },
-  { month: 'T3', viralLoad: 8500, detectable: 50 },
-  { month: 'T4', viralLoad: 1200, detectable: 50 },
-  { month: 'T5', viralLoad: 150, detectable: 50 },
-  { month: 'T6', viralLoad: 25, detectable: 50 },
-  { month: 'T7', viralLoad: 0, detectable: 50 },
-  { month: 'T8', viralLoad: 0, detectable: 50 },
+const depressionData = [
+  { month: 'T1', depression: 65, threshold: 40 },
+  { month: 'T2', depression: 60, threshold: 40 },
+  { month: 'T3', depression: 58, threshold: 40 },
+  { month: 'T4', depression: 52, threshold: 40 },
+  { month: 'T5', depression: 47, threshold: 40 },
+  { month: 'T6', depression: 45, threshold: 40 },
+  { month: 'T7', depression: 40, threshold: 40 },
+  { month: 'T8', depression: 38, threshold: 40 },
 ]
 
-const medicationAdherence = [
-  { month: 'T1', adherence: 85 },
-  { month: 'T2', adherence: 88 },
-  { month: 'T3', adherence: 92 },
-  { month: 'T4', adherence: 95 },
-  { month: 'T5', adherence: 97 },
-  { month: 'T6', adherence: 98 },
-  { month: 'T7', adherence: 96 },
-  { month: 'T8', adherence: 99 },
+const activityCompletionData = [
+  { month: 'T1', completion: 85 },
+  { month: 'T2', completion: 88 },
+  { month: 'T3', completion: 92 },
+  { month: 'T4', completion: 95 },
+  { month: 'T5', completion: 97 },
+  { month: 'T6', completion: 98 },
+  { month: 'T7', completion: 96 },
+  { month: 'T8', completion: 99 },
+]
+
+const moodData = [
+  { month: 'T1', mood: 4 },
+  { month: 'T2', mood: 4.5 },
+  { month: 'T3', mood: 5 },
+  { month: 'T4', mood: 5.5 },
+  { month: 'T5', mood: 6 },
+  { month: 'T6', mood: 6.8 },
+  { month: 'T7', mood: 7.2 },
+  { month: 'T8', mood: 7.5 },
 ]
 
 const appointmentData = [
-  { type: 'Khám định kỳ', count: 8, color: '#0ea5e9' },
-  { type: 'Xét nghiệm', count: 6, color: '#10b981' },
-  { type: 'Tư vấn', count: 4, color: '#f59e0b' },
-  { type: 'Khẩn cấp', count: 2, color: '#ef4444' },
+  { type: 'Tư vấn cá nhân', count: 8, color: '#0284c7' },
+  { type: 'Trị liệu nhóm', count: 6, color: '#10b981' },
+  { type: 'Đánh giá định kỳ', count: 4, color: '#f59e0b' },
+  { type: 'Hỗ trợ khẩn cấp', count: 2, color: '#dc2626' },
 ]
 
-const COLORS = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444']
+const COLORS = ['#0284c7', '#10b981', '#f59e0b', '#dc2626']
 
 const ReportsPage: React.FC = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('6months')
   const [activeTab, setActiveTab] = useState('overview')
   const reportRef = useRef<HTMLDivElement>(null)
+  const [animationVisible, setAnimationVisible] = useState(false)
+
+  useEffect(() => {
+    setAnimationVisible(true)
+  }, [])
 
   const handleExportPDF = () => {
     // PDF export functionality would be implemented here
@@ -66,15 +83,17 @@ const ReportsPage: React.FC = () => {
     value, 
     change, 
     changeType, 
-    icon: Icon 
+    icon: Icon,
+    animationDelay = 0
   }: { 
     title: string
     value: string
     change: string
     changeType: 'positive' | 'negative' | 'neutral'
-    icon: any 
+    icon: any,
+    animationDelay?: number
   }) => (
-    <div className="card">
+    <div className={`card fade-in slide-up`} style={{ animationDelay: `${animationDelay}ms` }}>
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-600">{title}</p>
@@ -90,27 +109,34 @@ const ReportsPage: React.FC = () => {
             </span>
           </div>
         </div>
-        <div className="p-3 bg-medical-50 rounded-lg">
-          <Icon className="w-6 h-6 text-medical-600" />
+        <div className="p-3 bg-gradient-to-br from-[#0284c7] to-[#0ea5e9] rounded-lg">
+          <Icon className="w-6 h-6 text-white" />
         </div>
       </div>
     </div>
   )
+
+  const getMoodEmoji = (mood: number) => {
+    if (mood >= 7) return <SmilePlus className="w-8 h-8 text-green-500" />;
+    if (mood >= 5) return <Sun className="w-8 h-8 text-yellow-500" />;
+    if (mood >= 4) return <MoonStar className="w-8 h-8 text-blue-500" />;
+    return <CloudRain className="w-8 h-8 text-gray-500" />;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Báo cáo sức khỏe</h1>
-            <p className="mt-2 text-gray-600">Theo dõi tiến trình điều trị và sức khỏe tổng thể</p>
+          <div className="fade-in slide-up">
+            <h1 className="text-3xl font-bold text-gray-900">Báo cáo sức khỏe tinh thần</h1>
+            <p className="mt-2 text-gray-600">Theo dõi tiến trình phục hồi và trạng thái cảm xúc</p>
           </div>
-          <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-3">
+          <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-3 fade-in slide-up" style={{ animationDelay: '200ms' }}>
             <select 
               value={selectedPeriod} 
               onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medical-500 focus:border-transparent"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0284c7] focus:border-transparent"
             >
               <option value="3months">3 tháng</option>
               <option value="6months">6 tháng</option>
@@ -119,7 +145,7 @@ const ReportsPage: React.FC = () => {
             </select>
             <button 
               onClick={handleExportPDF}
-              className="btn btn-primary inline-flex items-center"
+              className="btn btn-primary inline-flex items-center bg-gradient-to-r from-[#0284c7] to-[#0ea5e9] hover:from-[#0369a1] hover:to-[#0284c7] text-white"
             >
               <Download className="w-4 h-4 mr-2" />
               Xuất PDF
@@ -127,22 +153,21 @@ const ReportsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="border-b border-gray-200 mb-8">
+        {/* Tabs */}        <div className="border-b border-gray-200 mb-8 fade-in" style={{ animationDelay: '300ms' }}>
           <nav className="-mb-px flex space-x-8">
             {[
               { id: 'overview', name: 'Tổng quan', icon: Activity },
-              { id: 'cd4', name: 'CD4 Count', icon: TrendingUp },
-              { id: 'viral', name: 'Viral Load', icon: Heart },
-              { id: 'medication', name: 'Tuân thủ thuốc', icon: Pill },
+              { id: 'anxiety', name: 'Mức độ lo âu', icon: Brain },
+              { id: 'depression', name: 'Mức độ trầm cảm', icon: HeartPulse },
+              { id: 'activities', name: 'Hoạt động', icon: Sparkles },
               { id: 'appointments', name: 'Lịch hẹn', icon: Calendar },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm transition-all duration-300 ${
                   activeTab === tab.id
-                    ? 'border-medical-500 text-medical-600'
+                    ? 'border-[#0284c7] text-[#0284c7]'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
@@ -160,61 +185,70 @@ const ReportsPage: React.FC = () => {
               {/* Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
-                  title="CD4 Count hiện tại"
-                  value="595"
-                  change="+2.8% so với tháng trước"
+                  title="Mức độ lo âu hiện tại"
+                  value="35/100"
+                  change="-8% so với tháng trước"
                   changeType="positive"
-                  icon={TrendingUp}
+                  icon={Brain}
+                  animationDelay={100}
                 />
                 <StatCard
-                  title="Viral Load"
-                  value="Không phát hiện"
-                  change="Ổn định 4 tháng"
+                  title="Mức độ trầm cảm"
+                  value="38/100"
+                  change="-5% so với tháng trước"
                   changeType="positive"
-                  icon={Heart}
+                  icon={HeartPulse}
+                  animationDelay={200}
                 />
                 <StatCard
-                  title="Tuân thủ điều trị"
+                  title="Hoàn thành hoạt động"
                   value="99%"
                   change="+3% so với tháng trước"
                   changeType="positive"
-                  icon={Pill}
+                  icon={Sparkles}
+                  animationDelay={300}
                 />
                 <StatCard
-                  title="Lần khám gần nhất"
+                  title="Lần trị liệu gần nhất"
                   value="15/11/2024"
                   change="Kết quả tốt"
                   changeType="positive"
                   icon={Calendar}
+                  animationDelay={400}
                 />
               </div>
 
               {/* Combined Charts */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="card">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">CD4 Count theo thời gian</h3>
+                <div className="card fade-in" style={{ animationDelay: '500ms' }}>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Cảm xúc theo thời gian</h3>
                   <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={cd4Data}>
+                    <AreaChart data={moodData}>
+                      <defs>
+                        <linearGradient id="moodGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#0284c7" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#0284c7" stopOpacity={0.1}/>
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
-                      <YAxis />
+                      <YAxis domain={[0, 10]} />
                       <Tooltip />
                       <Legend />
-                      <Line type="monotone" dataKey="cd4" stroke="#0ea5e9" strokeWidth={2} />
-                      <Line type="monotone" dataKey="target" stroke="#ef4444" strokeDasharray="5 5" />
-                    </LineChart>
+                      <Area type="monotone" dataKey="mood" stroke="#0284c7" fillOpacity={1} fill="url(#moodGradient)" />
+                    </AreaChart>
                   </ResponsiveContainer>
                 </div>
 
-                <div className="card">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Tuân thủ điều trị</h3>
+                <div className="card fade-in" style={{ animationDelay: '600ms' }}>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Hoàn thành hoạt động</h3>
                   <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={medicationAdherence}>
+                    <BarChart data={activityCompletionData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
                       <YAxis />
                       <Tooltip />
-                      <Bar dataKey="adherence" fill="#10b981" />
+                      <Bar dataKey="completion" fill="#0284c7" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -222,116 +256,116 @@ const ReportsPage: React.FC = () => {
             </div>
           )}
 
-          {/* CD4 Tab */}
-          {activeTab === 'cd4' && (
+          {/* Anxiety Tab */}
+          {activeTab === 'anxiety' && (
             <div className="space-y-6">
-              <div className="card">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Biểu đồ CD4 Count</h3>
+              <div className="card fade-in">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Biểu đồ mức độ lo âu</h3>
                 <ResponsiveContainer width="100%" height={400}>
-                  <LineChart data={cd4Data}>
+                  <LineChart data={anxietyData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="cd4" stroke="#0ea5e9" strokeWidth={3} />
-                    <Line type="monotone" dataKey="target" stroke="#ef4444" strokeDasharray="5 5" />
+                    <Line type="monotone" dataKey="anxiety" stroke="#dc2626" strokeWidth={3} />
+                    <Line type="monotone" dataKey="target" stroke="#0284c7" strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="card text-center">
-                  <h4 className="font-semibold text-gray-900">CD4 hiện tại</h4>
-                  <p className="text-3xl font-bold text-medical-600 mt-2">595</p>
-                  <p className="text-sm text-gray-600 mt-1">cells/µL</p>
+                <div className="card text-center fade-in">
+                  <h4 className="font-semibold text-gray-900">Mức độ lo âu hiện tại</h4>
+                  <p className="text-3xl font-bold text-green-600 mt-2">35</p>
+                  <p className="text-sm text-gray-600 mt-1">thấp (0-100)</p>
                 </div>
-                <div className="card text-center">
+                <div className="card text-center fade-in" style={{ animationDelay: '100ms' }}>
                   <h4 className="font-semibold text-gray-900">Mục tiêu</h4>
-                  <p className="text-3xl font-bold text-green-600 mt-2">500+</p>
-                  <p className="text-sm text-gray-600 mt-1">cells/µL</p>
+                  <p className="text-3xl font-bold text-[#0284c7] mt-2">40 hoặc thấp hơn</p>
+                  <p className="text-sm text-gray-600 mt-1">Mức độ quản lý tốt</p>
                 </div>
-                <div className="card text-center">
+                <div className="card text-center fade-in" style={{ animationDelay: '200ms' }}>
                   <h4 className="font-semibold text-gray-900">Xu hướng</h4>
                   <div className="flex items-center justify-center mt-2">
-                    <TrendingUp className="w-8 h-8 text-green-500" />
+                    <TrendingDown className="w-8 h-8 text-green-500" />
                   </div>
-                  <p className="text-sm text-green-600 mt-1">Tăng đều</p>
+                  <p className="text-sm text-green-600 mt-1">Giảm đều</p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Viral Load Tab */}
-          {activeTab === 'viral' && (
+          {/* Depression Tab */}
+          {activeTab === 'depression' && (
             <div className="space-y-6">
-              <div className="card">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Biểu đồ Viral Load</h3>
+              <div className="card fade-in">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Biểu đồ mức độ trầm cảm</h3>
                 <ResponsiveContainer width="100%" height={400}>
-                  <LineChart data={viralLoadData}>
+                  <LineChart data={depressionData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
-                    <YAxis scale="log" domain={[1, 100000]} />
+                    <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="viralLoad" stroke="#ef4444" strokeWidth={3} />
-                    <Line type="monotone" dataKey="detectable" stroke="#f59e0b" strokeDasharray="5 5" />
+                    <Line type="monotone" dataKey="depression" stroke="#dc2626" strokeWidth={3} />
+                    <Line type="monotone" dataKey="threshold" stroke="#0284c7" strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="card text-center">
-                  <h4 className="font-semibold text-gray-900">Viral Load hiện tại</h4>
-                  <p className="text-3xl font-bold text-green-600 mt-2">Không phát hiện</p>
-                  <p className="text-sm text-gray-600 mt-1">&lt;50 copies/mL</p>
+                <div className="card text-center fade-in">
+                  <h4 className="font-semibold text-gray-900">Mức độ trầm cảm hiện tại</h4>
+                  <p className="text-3xl font-bold text-green-600 mt-2">38</p>
+                  <p className="text-sm text-gray-600 mt-1">thấp (0-100)</p>
                 </div>
-                <div className="card text-center">
-                  <h4 className="font-semibold text-gray-900">Thời gian đạt được</h4>
-                  <p className="text-3xl font-bold text-medical-600 mt-2">4</p>
-                  <p className="text-sm text-gray-600 mt-1">tháng liên tiếp</p>
+                <div className="card text-center fade-in" style={{ animationDelay: '100ms' }}>
+                  <h4 className="font-semibold text-gray-900">Mục tiêu</h4>
+                  <p className="text-3xl font-bold text-[#0284c7] mt-2">40 hoặc thấp hơn</p>
+                  <p className="text-sm text-gray-600 mt-1">Mức độ quản lý tốt</p>
                 </div>
-                <div className="card text-center">
-                  <h4 className="font-semibold text-gray-900">Trạng thái</h4>
+                <div className="card text-center fade-in" style={{ animationDelay: '200ms' }}>
+                  <h4 className="font-semibold text-gray-900">Xu hướng</h4>
                   <div className="flex items-center justify-center mt-2">
-                    <Heart className="w-8 h-8 text-green-500" />
+                    <TrendingDown className="w-8 h-8 text-green-500" />
                   </div>
-                  <p className="text-sm text-green-600 mt-1">Kiểm soát tốt</p>
+                  <p className="text-sm text-green-600 mt-1">Giảm đều</p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Medication Tab */}
-          {activeTab === 'medication' && (
+          {/* Activities Tab */}
+          {activeTab === 'activities' && (
             <div className="space-y-6">
-              <div className="card">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Tuân thủ điều trị theo thời gian</h3>
+              <div className="card fade-in">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Hoàn thành hoạt động theo thời gian</h3>
                 <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={medicationAdherence}>
+                  <BarChart data={activityCompletionData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis domain={[0, 100]} />
                     <Tooltip />
-                    <Bar dataKey="adherence" fill="#10b981" />
+                    <Bar dataKey="completion" fill="#0284c7" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="card text-center">
-                  <h4 className="font-semibold text-gray-900">Tuân thủ trung bình</h4>
+                <div className="card text-center fade-in">
+                  <h4 className="font-semibold text-gray-900">Tỉ lệ hoàn thành trung bình</h4>
                   <p className="text-3xl font-bold text-green-600 mt-2">94%</p>
                 </div>
-                <div className="card text-center">
+                <div className="card text-center fade-in" style={{ animationDelay: '100ms' }}>
                   <h4 className="font-semibold text-gray-900">Tháng này</h4>
-                  <p className="text-3xl font-bold text-medical-600 mt-2">99%</p>
+                  <p className="text-3xl font-bold text-[#0284c7] mt-2">99%</p>
                 </div>
-                <div className="card text-center">
-                  <h4 className="font-semibold text-gray-900">Liều bỏ lỡ</h4>
+                <div className="card text-center fade-in" style={{ animationDelay: '200ms' }}>
+                  <h4 className="font-semibold text-gray-900">Hoạt động bỏ lỡ</h4>
                   <p className="text-3xl font-bold text-orange-600 mt-2">2</p>
                 </div>
-                <div className="card text-center">
+                <div className="card text-center fade-in" style={{ animationDelay: '300ms' }}>
                   <h4 className="font-semibold text-gray-900">Xu hướng</h4>
                   <div className="flex items-center justify-center mt-2">
                     <TrendingUp className="w-8 h-8 text-green-500" />
@@ -345,8 +379,8 @@ const ReportsPage: React.FC = () => {
           {activeTab === 'appointments' && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="card">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Phân bố loại lịch hẹn</h3>
+                <div className="card fade-in">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Phân bố loại cuộc hẹn</h3>
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie
@@ -367,32 +401,32 @@ const ReportsPage: React.FC = () => {
                   </ResponsiveContainer>
                 </div>
 
-                <div className="card">
+                <div className="card fade-in" style={{ animationDelay: '100ms' }}>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Lịch hẹn sắp tới</h3>
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg transition-transform hover:scale-102 hover:shadow-md">
                       <div>
-                        <p className="font-medium text-gray-900">Khám định kỳ</p>
-                        <p className="text-sm text-gray-600">BS. Nguyễn Văn A</p>
+                        <p className="font-medium text-gray-900">Tư vấn cá nhân</p>
+                        <p className="text-sm text-gray-600">Ths. Nguyễn Văn A</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium text-medical-600">20/12/2024</p>
+                        <p className="font-medium text-[#0284c7]">20/12/2024</p>
                         <p className="text-sm text-gray-600">09:00</p>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg transition-transform hover:scale-102 hover:shadow-md">
                       <div>
-                        <p className="font-medium text-gray-900">Xét nghiệm máu</p>
-                        <p className="text-sm text-gray-600">Phòng Lab</p>
+                        <p className="font-medium text-gray-900">Trị liệu nhóm</p>
+                        <p className="text-sm text-gray-600">Phòng sinh hoạt</p>
                       </div>
                       <div className="text-right">
                         <p className="font-medium text-green-600">25/12/2024</p>
-                        <p className="text-sm text-gray-600">07:30</p>
+                        <p className="text-sm text-gray-600">15:30</p>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg transition-transform hover:scale-102 hover:shadow-md">
                       <div>
-                        <p className="font-medium text-gray-900">Tư vấn dinh dưỡng</p>
+                        <p className="font-medium text-gray-900">Đánh giá tâm lý</p>
                         <p className="text-sm text-gray-600">Phòng tư vấn</p>
                       </div>
                       <div className="text-right">
@@ -404,11 +438,11 @@ const ReportsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="card">
+              <div className="card fade-in" style={{ animationDelay: '200ms' }}>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Thống kê lịch hẹn</h3>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-medical-600">20</p>
+                    <p className="text-2xl font-bold text-[#0284c7]">20</p>
                     <p className="text-sm text-gray-600">Tổng lịch hẹn</p>
                   </div>
                   <div className="text-center">
@@ -420,7 +454,7 @@ const ReportsPage: React.FC = () => {
                     <p className="text-sm text-gray-600">Đã hủy</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-red-600">1</p>
+                    <p className="text-2xl font-bold text-[#dc2626]">1</p>
                     <p className="text-sm text-gray-600">Bỏ lỡ</p>
                   </div>
                 </div>
@@ -430,24 +464,24 @@ const ReportsPage: React.FC = () => {
         </div>
 
         {/* Additional Information */}
-        <div className="mt-8 card">
+        <div className="mt-8 card fade-in" style={{ animationDelay: '300ms' }}>
           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
             <FileText className="w-5 h-5 mr-2" />
-            Ghi chú từ bác sĩ
+            Ghi chú từ chuyên gia tâm lý
           </h3>
           <div className="space-y-3">
-            <div className="p-3 bg-blue-50 rounded-lg">
-              <p className="text-sm font-medium text-gray-900">15/11/2024 - BS. Nguyễn Văn A</p>
+            <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg hover:shadow-md transition-all duration-300">
+              <p className="text-sm font-medium text-gray-900">15/11/2024 - Ths. Nguyễn Văn A</p>
               <p className="text-sm text-gray-700 mt-1">
-                Bệnh nhân tuân thủ điều trị tốt. CD4 count tăng ổn định. Tiếp tục phác đồ hiện tại.
-                Tái khám sau 3 tháng.
+                Khách hàng đã có tiến bộ đáng kể trong việc quản lý lo âu. Các bài tập thở và thiền đang 
+                phát huy hiệu quả. Tiếp tục áp dụng phương pháp trị liệu nhận thức hành vi (CBT).
               </p>
             </div>
-            <div className="p-3 bg-green-50 rounded-lg">
-              <p className="text-sm font-medium text-gray-900">15/08/2024 - BS. Trần Thị B</p>
+            <div className="p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg hover:shadow-md transition-all duration-300">
+              <p className="text-sm font-medium text-gray-900">15/08/2024 - Ths. Trần Thị B</p>
               <p className="text-sm text-gray-700 mt-1">
-                Viral load không phát hiện. Kết quả xét nghiệm gan, thận bình thường. 
-                Khuyến khích duy trì lối sống lành mạnh.
+                Mức độ trầm cảm đã giảm. Khách hàng tích cực tham gia các hoạt động xã hội và 
+                thực hành các kỹ thuật đối phó. Khuyến khích duy trì lịch sinh hoạt đều đặn.
               </p>
             </div>
           </div>

@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   User, Bell, Shield, SettingsIcon,
   Save, Eye, EyeOff, Camera, Mail,
-  Smartphone, Monitor, Moon, Sun
+  Smartphone, Monitor, Moon, Sun,
+  Brain, Heart, Sparkles
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useNotifications } from '../contexts/NotificationContext'
@@ -20,11 +21,12 @@ interface UserProfile {
     phone: string
     relationship: string
   }
-  medicalInfo: {
-    bloodType: string
-    allergies: string[]
-    chronicConditions: string[]
-    currentMedications: string[]
+  mentalHealthInfo: {
+    therapistName: string
+    diagnoses: string[]
+    triggers: string[]
+    copingStrategies: string[]
+    currentActivities: string[]
   }
   avatar?: string
 }
@@ -41,9 +43,9 @@ interface NotificationSettings {
   email: boolean
   sms: boolean
   push: boolean
-  medication: boolean
+  mentalHealthActivities: boolean
   appointments: boolean
-  testResults: boolean
+  moodTracking: boolean
   systemUpdates: boolean
   reminderTiming: number
 }
@@ -68,6 +70,12 @@ const SettingsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'profile' | 'app' | 'notifications' | 'privacy' | 'security'>('profile')
   const [showPassword, setShowPassword] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
+  const [animationVisible, setAnimationVisible] = useState(false)
+  
+  useEffect(() => {
+    setAnimationVisible(true)
+  }, [])
+  
   // Mock data - in real app, this would come from API using user data
   const [profile, setProfile] = useState<UserProfile>({
     id: user?.id || '1',
@@ -82,14 +90,14 @@ const SettingsPage: React.FC = () => {
       phone: '0987654321',
       relationship: 'Vợ'
     },
-    medicalInfo: {
-      bloodType: 'A+',
-      allergies: ['Penicillin', 'Đậu phộng'],
-      chronicConditions: ['HIV'],
-      currentMedications: ['Efavirenz/Emtricitabine/Tenofovir']
+    mentalHealthInfo: {
+      therapistName: 'ThS. Trần Thị C',
+      diagnoses: ['Lo âu', 'Trầm cảm nhẹ'],
+      triggers: ['Áp lực công việc', 'Mâu thuẫn gia đình'],
+      copingStrategies: ['Thiền định', 'Tập thể dục', 'Viết nhật ký'],
+      currentActivities: ['Tham gia nhóm hỗ trợ', 'Thực hành chánh niệm hàng ngày']
     }
   })
-
   const [appSettings, setAppSettings] = useState<AppSettings>({
     theme: 'light',
     language: 'vi',
@@ -102,9 +110,9 @@ const SettingsPage: React.FC = () => {
     email: true,
     sms: true,
     push: true,
-    medication: true,
+    mentalHealthActivities: true,
     appointments: true,
-    testResults: true,
+    moodTracking: true,
     systemUpdates: false,
     reminderTiming: 30
   })
@@ -144,7 +152,6 @@ const SettingsPage: React.FC = () => {
       })
     }
   }
-
   const tabs = [
     { id: 'profile', label: 'Hồ sơ cá nhân', icon: User },
     { id: 'app', label: 'Ứng dụng', icon: SettingsIcon },
@@ -157,7 +164,7 @@ const SettingsPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 fade-in">
           <h1 className="text-3xl font-bold text-gray-900">Cài đặt</h1>
           <p className="mt-2 text-gray-600">Quản lý thông tin cá nhân và cài đặt ứng dụng</p>
         </div>
@@ -165,19 +172,20 @@ const SettingsPage: React.FC = () => {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
           <div className="lg:w-1/4">
-            <div className="card">
+            <div className="card-glow fade-in" style={{ animationDelay: '100ms' }}>
               <nav className="space-y-2">
-                {tabs.map(tab => (
+                {tabs.map((tab, index) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
                     className={`w-full flex items-center px-3 py-2 text-left rounded-lg transition-colors ${
                       activeTab === tab.id
-                        ? 'bg-medical-100 text-medical-700 border-l-4 border-medical-500'
+                        ? 'bg-gradient-to-r from-brand-100 to-ocean-100 text-ocean-700 border-l-4 border-ocean-500'
                         : 'text-gray-600 hover:bg-gray-100'
                     }`}
+                    style={{ animationDelay: `${(index + 1) * 100}ms` }}
                   >
-                    <tab.icon className="w-5 h-5 mr-3" />
+                    <tab.icon className={`w-5 h-5 mr-3 ${activeTab === tab.id ? 'text-ocean-600' : ''}`} />
                     {tab.label}
                   </button>
                 ))}
@@ -186,11 +194,11 @@ const SettingsPage: React.FC = () => {
           </div>
 
           {/* Main Content */}
-          <div className="lg:w-3/4">
+          <div className="lg:w-3/4 fade-in" style={{ animationDelay: '200ms' }}>
             {/* Profile Tab */}
             {activeTab === 'profile' && (
               <div className="space-y-6">
-                <div className="card">
+                <div className="card-glow">
                   <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-semibold text-gray-900">Thông tin cá nhân</h2>
                     <button
@@ -364,42 +372,34 @@ const SettingsPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Medical Information */}
+                {/* Mental Health Information */}
                 <div className="card">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông tin y tế</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông tin sức khỏe tâm thần</h3>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Nhóm máu
+                        Tên nhà trị liệu
                       </label>
-                      <select
-                        value={profile.medicalInfo.bloodType}
+                      <input
+                        type="text"
+                        value={profile.mentalHealthInfo.therapistName}
                         onChange={(e) => setProfile(prev => ({
                           ...prev,
-                          medicalInfo: { ...prev.medicalInfo, bloodType: e.target.value }
+                          mentalHealthInfo: { ...prev.mentalHealthInfo, therapistName: e.target.value }
                         }))}
                         disabled={!isEditing}
-                        className="form-select"
-                      >
-                        <option value="A+">A+</option>
-                        <option value="A-">A-</option>
-                        <option value="B+">B+</option>
-                        <option value="B-">B-</option>
-                        <option value="AB+">AB+</option>
-                        <option value="AB-">AB-</option>
-                        <option value="O+">O+</option>
-                        <option value="O-">O-</option>
-                      </select>
+                        className="form-input"
+                      />
                     </div>
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Dị ứng
+                        Chẩn đoán
                       </label>
                       <div className="flex flex-wrap gap-2">
-                        {profile.medicalInfo.allergies.map((allergy, index) => (
-                          <span key={index} className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm">
-                            {allergy}
+                        {profile.mentalHealthInfo.diagnoses.map((diagnosis, index) => (
+                          <span key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
+                            {diagnosis}
                           </span>
                         ))}
                       </div>
@@ -407,12 +407,38 @@ const SettingsPage: React.FC = () => {
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Tình trạng sức khỏe mãn tính
+                        Yếu tố kích thích
                       </label>
                       <div className="flex flex-wrap gap-2">
-                        {profile.medicalInfo.chronicConditions.map((condition, index) => (
+                        {profile.mentalHealthInfo.triggers.map((trigger, index) => (
+                          <span key={index} className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm">
+                            {trigger}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Chiến lược đối phó
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {profile.mentalHealthInfo.copingStrategies.map((strategy, index) => (
+                          <span key={index} className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
+                            {strategy}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Hoạt động hiện tại
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {profile.mentalHealthInfo.currentActivities.map((activity, index) => (
                           <span key={index} className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-sm">
-                            {condition}
+                            {activity}
                           </span>
                         ))}
                       </div>
@@ -572,14 +598,13 @@ const SettingsPage: React.FC = () => {
                       ))}
                     </div>
                   </div>
-                  
-                  <div>
+                    <div>
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Loại thông báo</h3>
                     <div className="space-y-3">
                       {[
-                        { key: 'medication', label: 'Nhắc nhở uống thuốc' },
-                        { key: 'appointments', label: 'Lịch hẹn' },
-                        { key: 'testResults', label: 'Kết quả xét nghiệm' },
+                        { key: 'mentalHealthActivities', label: 'Nhắc nhở hoạt động tinh thần' },
+                        { key: 'appointments', label: 'Lịch hẹn trị liệu' },
+                        { key: 'moodTracking', label: 'Theo dõi cảm xúc' },
                         { key: 'systemUpdates', label: 'Cập nhật hệ thống' }
                       ].map(type => (
                         <label key={type.key} className="flex items-center">

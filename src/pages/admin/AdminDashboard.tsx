@@ -1,42 +1,43 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
-  Users, UserCheck, Calendar, TestTube, Pill, 
-  TrendingUp, AlertTriangle, Settings, Download,
+  Users, UserCheck, Calendar, Brain, 
+  AlertTriangle, Settings, Download,
   Search, Plus, Edit, Eye, Trash2,
-  BarChart3, Activity, Clock, CheckCircle
+  BarChart3, Activity, Clock, CheckCircle,
+  HeartPulse, Sparkles, Smile
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 
 interface DashboardStats {
-  totalPatients: number
-  activePatients: number
-  newPatientsThisMonth: number
-  appointmentsToday: number
-  pendingTestResults: number
-  medicationAdherence: number
+  totalClients: number
+  activeClients: number
+  newClientsThisMonth: number
+  sessionsToday: number
+  pendingAssessments: number
+  activityCompletion: number
   emergencyAlerts: number
 }
 
-interface Patient {
+interface Client {
   id: string
   name: string
   email: string
   phone: string
   dateOfBirth: string
-  diagnosisDate: string
-  currentTreatment: string
-  lastVisit: string
-  nextAppointment?: string
-  adherenceRate: number
-  status: 'active' | 'inactive' | 'critical'
-  assignedDoctor: string
+  initialAssessmentDate: string
+  currentTherapyType: string
+  lastSession: string
+  nextSession?: string
+  activityCompletionRate: number
+  status: 'active' | 'inactive' | 'urgent'
+  assignedTherapist: string
 }
 
 interface RecentActivity {
   id: string
-  type: 'appointment' | 'test' | 'medication' | 'alert'
-  patient: string
+  type: 'session' | 'assessment' | 'activity' | 'alert'
+  client: string
   description: string
   timestamp: string
   status: 'completed' | 'pending' | 'cancelled' | 'urgent'
@@ -49,34 +50,34 @@ interface SystemAlert {
   message: string
   timestamp: string
   isRead: boolean
-  patientId?: string
+  clientId?: string
 }
 
 // Mock data
 const mockStats: DashboardStats = {
-  totalPatients: 1247,
-  activePatients: 1198,
-  newPatientsThisMonth: 23,
-  appointmentsToday: 18,
-  pendingTestResults: 7,
-  medicationAdherence: 94.2,
+  totalClients: 1247,
+  activeClients: 1198,
+  newClientsThisMonth: 23,
+  sessionsToday: 18,
+  pendingAssessments: 7,
+  activityCompletion: 94.2,
   emergencyAlerts: 3
 }
 
-const mockPatients: Patient[] = [
+const mockClients: Client[] = [
   {
     id: '1',
     name: 'Nguyễn Văn A',
     email: 'nguyenvana@email.com',
     phone: '0901234567',
     dateOfBirth: '1985-03-15',
-    diagnosisDate: '2023-01-20',
-    currentTreatment: 'Efavirenz/Emtricitabine/Tenofovir',
-    lastVisit: '2024-01-15',
-    nextAppointment: '2024-02-15',
-    adherenceRate: 96,
+    initialAssessmentDate: '2023-01-20',
+    currentTherapyType: 'Liệu pháp nhận thức hành vi (CBT)',
+    lastSession: '2024-01-15',
+    nextSession: '2024-02-15',
+    activityCompletionRate: 96,
     status: 'active',
-    assignedDoctor: 'BS. Trần Thị B'
+    assignedTherapist: 'ThS. Trần Thị B'
   },
   {
     id: '2',
@@ -84,13 +85,13 @@ const mockPatients: Patient[] = [
     email: 'lethic@email.com',
     phone: '0912345678',
     dateOfBirth: '1990-07-22',
-    diagnosisDate: '2023-06-10',
-    currentTreatment: 'Dolutegravir + Tenofovir/Emtricitabine',
-    lastVisit: '2024-01-10',
-    nextAppointment: '2024-02-10',
-    adherenceRate: 98,
+    initialAssessmentDate: '2023-06-10',
+    currentTherapyType: 'Liệu pháp tâm lý động (Psychodynamic)',
+    lastSession: '2024-01-10',
+    nextSession: '2024-02-10',
+    activityCompletionRate: 98,
     status: 'active',
-    assignedDoctor: 'BS. Nguyễn Văn D'
+    assignedTherapist: 'ThS. Nguyễn Văn D'
   },
   {
     id: '3',
@@ -98,44 +99,45 @@ const mockPatients: Patient[] = [
     email: 'phamvane@email.com',
     phone: '0923456789',
     dateOfBirth: '1978-11-05',
-    diagnosisDate: '2022-08-15',
-    currentTreatment: 'Lopinavir/Ritonavir',
-    lastVisit: '2024-01-08',
-    adherenceRate: 78,
-    status: 'critical',
-    assignedDoctor: 'BS. Hoàng Thị F'
+    initialAssessmentDate: '2022-08-15',
+    currentTherapyType: 'Liệu pháp giải pháp ngắn hạn (SFBT)',
+    lastSession: '2024-01-05',
+    nextSession: '2024-01-20',
+    activityCompletionRate: 85,
+    status: 'urgent',
+    assignedTherapist: 'ThS. Phạm Thị F'
   }
 ]
 
 const mockRecentActivity: RecentActivity[] = [
   {
     id: '1',
-    type: 'appointment',
-    patient: 'Nguyễn Văn A',
-    description: 'Hoàn thành khám định kỳ',
+    type: 'session',
+    client: 'Nguyễn Văn A',
+    description: 'Hoàn thành phiên tư vấn',
     timestamp: new Date().toISOString(),
     status: 'completed'
   },
   {
     id: '2',
-    type: 'test',
-    patient: 'Lê Thị C',
-    description: 'Kết quả xét nghiệm CD4: 450 cells/μL',
+    type: 'assessment',
+    client: 'Lê Thị C',
+    description: 'Đánh giá tâm lý định kỳ hoàn thành',
     timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     status: 'completed'
   },
   {
     id: '3',
-    type: 'medication',
-    patient: 'Phạm Văn E',
-    description: 'Cảnh báo: Tuân thủ dưới 80%',
+    type: 'activity',
+    client: 'Phạm Văn E',
+    description: 'Cảnh báo: Hoạt động dưới 80%',
     timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
     status: 'urgent'
   },
   {
     id: '4',
-    type: 'appointment',
-    patient: 'Trần Thị G',
+    type: 'session',
+    client: 'Trần Thị G',
     description: 'Lịch hẹn mới được đặt',
     timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
     status: 'pending'
@@ -146,17 +148,17 @@ const mockSystemAlerts: SystemAlert[] = [
   {
     id: '1',
     type: 'critical',
-    title: 'Tuân thủ điều trị thấp',
-    message: 'Phạm Văn E có tỷ lệ tuân thủ dưới 80% trong 2 tuần qua',
+    title: 'Hoạt động thấp',
+    message: 'Phạm Văn E có tỷ lệ hoạt động dưới 80% trong 2 tuần qua',
     timestamp: new Date().toISOString(),
     isRead: false,
-    patientId: '3'
+    clientId: '3'
   },
   {
     id: '2',
     type: 'warning',
-    title: 'Xét nghiệm quá hạn',
-    message: '5 bệnh nhân cần xét nghiệm định kỳ trong tuần này',
+    title: 'Đánh giá quá hạn',
+    message: '5 khách hàng cần đánh giá tâm lý định kỳ trong tuần này',
     timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     isRead: false
   },
@@ -171,18 +173,18 @@ const mockSystemAlerts: SystemAlert[] = [
 ]
 
 const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'patients' | 'activity' | 'alerts' | 'settings'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'clients' | 'activity' | 'alerts' | 'settings'>('overview')
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<string>('all')
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [stats] = useState<DashboardStats>(mockStats)
   const [alerts, setAlerts] = useState<SystemAlert[]>(mockSystemAlerts)
 
-  // Filter patients based on search and status
-  const filteredPatients = mockPatients.filter(patient => {
-    const matchesSearch = patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         patient.email.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = filterStatus === 'all' || patient.status === filterStatus
+  // Filter clients based on search and status
+  const filteredClients = mockClients.filter(client => {
+    const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         client.email.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = filterStatus === 'all' || client.status === filterStatus
     return matchesSearch && matchesStatus
   })
 
@@ -190,33 +192,31 @@ const AdminDashboard: React.FC = () => {
     switch (status) {
       case 'active': return 'text-green-600 bg-green-100'
       case 'inactive': return 'text-gray-600 bg-gray-100'
-      case 'critical': return 'text-red-600 bg-red-100'
+      case 'urgent': return 'text-red-600 bg-red-100'
       case 'completed': return 'text-green-600 bg-green-100'
       case 'pending': return 'text-yellow-600 bg-yellow-100'
       case 'cancelled': return 'text-red-600 bg-red-100'
-      case 'urgent': return 'text-red-600 bg-red-100'
       default: return 'text-gray-600 bg-gray-100'
     }
   }
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'active': return 'Đang điều trị'
-      case 'inactive': return 'Ngừng điều trị'
-      case 'critical': return 'Cần theo dõi'
+      case 'active': return 'Đang trị liệu'
+      case 'inactive': return 'Ngừng trị liệu'
+      case 'urgent': return 'Cần hỗ trợ'
       case 'completed': return 'Hoàn thành'
       case 'pending': return 'Chờ xử lý'
       case 'cancelled': return 'Đã hủy'
-      case 'urgent': return 'Khẩn cấp'
       default: return status
     }
   }
 
   const getActivityIcon = (type: string) => {
     switch (type) {
-      case 'appointment': return <Calendar className="w-4 h-4 text-blue-600" />
-      case 'test': return <TestTube className="w-4 h-4 text-green-600" />
-      case 'medication': return <Pill className="w-4 h-4 text-purple-600" />
+      case 'session': return <Calendar className="w-4 h-4 text-blue-600" />
+      case 'assessment': return <Brain className="w-4 h-4 text-green-600" />
+      case 'activity': return <Sparkles className="w-4 h-4 text-purple-600" />
       case 'alert': return <AlertTriangle className="w-4 h-4 text-red-600" />
       default: return <Activity className="w-4 h-4 text-gray-600" />
     }
@@ -239,35 +239,45 @@ const AdminDashboard: React.FC = () => {
 
   const unreadAlertsCount = alerts.filter(alert => !alert.isRead).length
 
+  const tabItems = [
+    { id: 'overview' as const, label: 'Tổng quan', icon: BarChart3 },
+    { id: 'clients' as const, label: 'Khách hàng', icon: Users },
+    { id: 'activity' as const, label: 'Hoạt động', icon: Activity },
+    { id: 'alerts' as const, label: `Cảnh báo (${unreadAlertsCount})`, icon: AlertTriangle },
+    { id: 'settings' as const, label: 'Cài đặt', icon: Settings }
+  ]
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-blue-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Bảng điều khiển quản trị</h1>
-          <p className="mt-2 text-gray-600">Tổng quan hệ thống HIV Care Connect</p>
+        <div className="mb-8 fade-in">
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-blue-600">
+              Bảng điều khiển quản trị
+            </span>
+            <span className="ml-2 text-sm bg-gradient-to-r from-red-600 to-blue-600 text-white px-2 py-1 rounded-full">
+              YOU ARE HEARD
+            </span>
+          </h1>
+          <p className="mt-2 text-gray-600">Tổng quan hệ thống sức khỏe tâm thần</p>
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-gray-200 mb-6">
+        <div className="border-b border-gray-200 mb-6 slide-up">
           <nav className="-mb-px flex space-x-8">
-            {[
-              { id: 'overview', label: 'Tổng quan', icon: BarChart3 },
-              { id: 'patients', label: 'Bệnh nhân', icon: Users },
-              { id: 'activity', label: 'Hoạt động', icon: Activity },
-              { id: 'alerts', label: `Cảnh báo (${unreadAlertsCount})`, icon: AlertTriangle },
-              { id: 'settings', label: 'Cài đặt', icon: Settings }
-            ].map(tab => (
+            {tabItems.map((tab, index) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center ${
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center transition-all duration-300 ${
                   activeTab === tab.id
-                    ? 'border-medical-500 text-medical-600'
+                    ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
+                style={{ animationDelay: `${index * 100}ms` }}
               >
-                <tab.icon className="w-4 h-4 mr-2" />
+                <tab.icon className={`w-4 h-4 mr-2 ${activeTab === tab.id ? 'text-blue-600' : 'text-gray-400'}`} />
                 {tab.label}
               </button>
             ))}
@@ -279,33 +289,33 @@ const AdminDashboard: React.FC = () => {
           <div className="space-y-6">
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="card text-center">
-                <Users className="w-8 h-8 text-medical-600 mx-auto mb-2" />
-                <h3 className="text-2xl font-bold text-medical-600">{stats.totalPatients}</h3>
-                <p className="text-gray-600">Tổng bệnh nhân</p>
-                <p className="text-sm text-green-600 mt-1">+{stats.newPatientsThisMonth} tháng này</p>
+              <div className="card text-center bg-white shadow-md rounded-xl p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 slide-up" style={{ animationDelay: '100ms' }}>
+                <Users className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                <h3 className="text-2xl font-bold text-blue-600">{stats.totalClients}</h3>
+                <p className="text-gray-600">Tổng khách hàng</p>
+                <p className="text-sm text-green-600 mt-1 float">+{stats.newClientsThisMonth} tháng này</p>
               </div>
               
-              <div className="card text-center">
+              <div className="card text-center bg-white shadow-md rounded-xl p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 slide-up" style={{ animationDelay: '200ms' }}>
                 <UserCheck className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                <h3 className="text-2xl font-bold text-green-600">{stats.activePatients}</h3>
-                <p className="text-gray-600">Đang điều trị</p>
-                <p className="text-sm text-gray-500 mt-1">{((stats.activePatients / stats.totalPatients) * 100).toFixed(1)}%</p>
+                <h3 className="text-2xl font-bold text-green-600">{stats.activeClients}</h3>
+                <p className="text-gray-600">Đang trị liệu</p>
+                <p className="text-sm text-gray-500 mt-1 float">{((stats.activeClients / stats.totalClients) * 100).toFixed(1)}%</p>
               </div>
               
-              <div className="card text-center">
+              <div className="card text-center bg-white shadow-md rounded-xl p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 slide-up" style={{ animationDelay: '300ms' }}>
                 <Calendar className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                <h3 className="text-2xl font-bold text-blue-600">{stats.appointmentsToday}</h3>
+                <h3 className="text-2xl font-bold text-blue-600">{stats.sessionsToday}</h3>
                 <p className="text-gray-600">Lịch hẹn hôm nay</p>
-                <p className="text-sm text-blue-600 mt-1">{stats.pendingTestResults} kết quả chờ</p>
+                <p className="text-sm text-blue-600 mt-1 float">{stats.pendingAssessments} đánh giá chờ</p>
               </div>
               
-              <div className="card text-center">
-                <TrendingUp className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                <h3 className="text-2xl font-bold text-purple-600">{stats.medicationAdherence}%</h3>
-                <p className="text-gray-600">Tuân thủ điều trị</p>
+              <div className="card text-center bg-white shadow-md rounded-xl p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 slide-up" style={{ animationDelay: '400ms' }}>
+                <Smile className="w-8 h-8 text-red-600 mx-auto mb-2" />
+                <h3 className="text-2xl font-bold text-red-600">{stats.activityCompletion}%</h3>
+                <p className="text-gray-600">Hoàn thành hoạt động</p>
                 {stats.emergencyAlerts > 0 && (
-                  <p className="text-sm text-red-600 mt-1">{stats.emergencyAlerts} cảnh báo khẩn cấp</p>
+                  <p className="text-sm text-red-600 mt-1 bounce-gentle">{stats.emergencyAlerts} cảnh báo sức khỏe</p>
                 )}
               </div>
             </div>
@@ -313,22 +323,26 @@ const AdminDashboard: React.FC = () => {
             {/* Recent Activity and Alerts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Recent Activity */}
-              <div className="card">
+              <div className="card bg-white shadow-md rounded-xl p-6 border border-gray-100 slide-up" style={{ animationDelay: '500ms' }}>
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">Hoạt động gần đây</h3>
                   <button
                     onClick={() => setActiveTab('activity')}
-                    className="text-medical-600 hover:text-medical-800 text-sm"
+                    className="text-blue-600 hover:text-blue-800 text-sm transition-all"
                   >
                     Xem tất cả
                   </button>
                 </div>
                 <div className="space-y-3">
-                  {mockRecentActivity.slice(0, 5).map(activity => (
-                    <div key={activity.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                  {mockRecentActivity.slice(0, 5).map((activity, index) => (
+                    <div 
+                      key={activity.id} 
+                      className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition-all slide-up"
+                      style={{ animationDelay: `${600 + index * 100}ms` }}
+                    >
                       {getActivityIcon(activity.type)}
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">{activity.patient}</p>
+                        <p className="text-sm font-medium text-gray-900">{activity.client}</p>
                         <p className="text-sm text-gray-600">{activity.description}</p>
                         <p className="text-xs text-gray-400">
                           {format(new Date(activity.timestamp), 'HH:mm dd/MM', { locale: vi })}
@@ -343,26 +357,27 @@ const AdminDashboard: React.FC = () => {
               </div>
 
               {/* System Alerts */}
-              <div className="card">
+              <div className="card bg-white shadow-md rounded-xl p-6 border border-gray-100 slide-up" style={{ animationDelay: '500ms' }}>
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">Cảnh báo hệ thống</h3>
                   <button
                     onClick={() => setActiveTab('alerts')}
-                    className="text-medical-600 hover:text-medical-800 text-sm"
+                    className="text-blue-600 hover:text-blue-800 text-sm transition-all"
                   >
                     Xem tất cả
                   </button>
                 </div>
                 <div className="space-y-3">
-                  {alerts.slice(0, 4).map(alert => (
+                  {alerts.slice(0, 4).map((alert, index) => (
                     <div 
                       key={alert.id} 
-                      className={`p-3 rounded-lg border-l-4 cursor-pointer ${
+                      className={`p-3 rounded-lg border-l-4 cursor-pointer transition-all slide-up hover:shadow-md ${
                         alert.type === 'critical' ? 'border-red-500 bg-red-50' :
                         alert.type === 'warning' ? 'border-yellow-500 bg-yellow-50' :
                         'border-blue-500 bg-blue-50'
-                      } ${!alert.isRead ? 'ring-2 ring-medical-200' : ''}`}
+                      } ${!alert.isRead ? 'ring-2 ring-blue-200' : ''}`}
                       onClick={() => markAlertAsRead(alert.id)}
+                      style={{ animationDelay: `${600 + index * 100}ms` }}
                     >
                       <div className="flex items-start space-x-3">
                         {getAlertIcon(alert.type)}
@@ -374,7 +389,7 @@ const AdminDashboard: React.FC = () => {
                           </p>
                         </div>
                         {!alert.isRead && (
-                          <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                          <div className="w-2 h-2 bg-red-500 rounded-full pulse"></div>
                         )}
                       </div>
                     </div>
@@ -385,73 +400,73 @@ const AdminDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Patients Tab */}
-        {activeTab === 'patients' && (
+        {/* Clients Tab */}
+        {activeTab === 'clients' && (
           <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">Quản lý bệnh nhân</h2>
+            <div className="flex justify-between items-center fade-in">
+              <h2 className="text-xl font-semibold text-gray-900">Quản lý khách hàng</h2>
               <div className="flex space-x-3">
-                <button className="btn btn-secondary">
+                <button className="btn btn-secondary bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition-all">
                   <Download className="w-4 h-4 mr-2" />
                   Xuất danh sách
                 </button>
-                <button className="btn btn-primary">
+                <button className="btn btn-primary bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-2 px-4 rounded-lg transition-all">
                   <Plus className="w-4 h-4 mr-2" />
-                  Thêm bệnh nhân
+                  Thêm khách hàng
                 </button>
               </div>
             </div>
 
             {/* Search and Filter */}
-            <div className="card">
+            <div className="card bg-white shadow-md rounded-xl p-6 border border-gray-100 slide-up">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
                 <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <input
                       type="text"
-                      placeholder="Tìm kiếm bệnh nhân..."
+                      placeholder="Tìm kiếm khách hàng..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medical-500 focus:border-transparent"
+                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     />
                   </div>
                   
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="form-select"
+                    className="form-select border border-gray-300 rounded-lg py-2 px-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   >
                     <option value="all">Tất cả trạng thái</option>
-                    <option value="active">Đang điều trị</option>
-                    <option value="inactive">Ngừng điều trị</option>
-                    <option value="critical">Cần theo dõi</option>
+                    <option value="active">Đang trị liệu</option>
+                    <option value="inactive">Ngừng trị liệu</option>
+                    <option value="urgent">Cần hỗ trợ</option>
                   </select>
                 </div>
                 
                 <div className="text-sm text-gray-600">
-                  {filteredPatients.length} / {mockPatients.length} bệnh nhân
+                  {filteredClients.length} / {mockClients.length} khách hàng
                 </div>
               </div>
             </div>
 
-            {/* Patients List */}
-            <div className="card overflow-hidden">
+            {/* Clients List */}
+            <div className="card bg-white shadow-md rounded-xl overflow-hidden border border-gray-100 slide-up" style={{ animationDelay: '200ms' }}>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Bệnh nhân
+                        Khách hàng
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Liên hệ
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Điều trị
+                        Liệu pháp
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Tuân thủ
+                        Hoàn thành hoạt động
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Trạng thái
@@ -462,58 +477,58 @@ const AdminDashboard: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredPatients.map((patient) => (
-                      <tr key={patient.id} className="hover:bg-gray-50">
+                    {filteredClients.map((client, index) => (
+                      <tr key={client.id} className="hover:bg-blue-50 transition-all slide-up" style={{ animationDelay: `${300 + index * 100}ms` }}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>
-                            <div className="text-sm font-medium text-gray-900">{patient.name}</div>
+                            <div className="text-sm font-medium text-gray-900">{client.name}</div>
                             <div className="text-sm text-gray-500">
-                              Sinh: {format(new Date(patient.dateOfBirth), 'dd/MM/yyyy', { locale: vi })}
+                              Sinh: {format(new Date(client.dateOfBirth), 'dd/MM/yyyy', { locale: vi })}
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{patient.email}</div>
-                          <div className="text-sm text-gray-500">{patient.phone}</div>
+                          <div className="text-sm text-gray-900">{client.email}</div>
+                          <div className="text-sm text-gray-500">{client.phone}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{patient.currentTreatment}</div>
-                          <div className="text-sm text-gray-500">BS: {patient.assignedDoctor}</div>
+                          <div className="text-sm text-gray-900">{client.currentTherapyType}</div>
+                          <div className="text-sm text-gray-500">ThS: {client.assignedTherapist}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <div className="text-sm font-medium text-gray-900">{patient.adherenceRate}%</div>
+                            <div className="text-sm font-medium text-gray-900">{client.activityCompletionRate}%</div>
                             <div className={`ml-2 w-16 h-2 rounded-full ${
-                              patient.adherenceRate >= 95 ? 'bg-green-200' :
-                              patient.adherenceRate >= 85 ? 'bg-yellow-200' : 'bg-red-200'
+                              client.activityCompletionRate >= 95 ? 'bg-green-200' :
+                              client.activityCompletionRate >= 85 ? 'bg-yellow-200' : 'bg-red-200'
                             }`}>
                               <div 
                                 className={`h-2 rounded-full ${
-                                  patient.adherenceRate >= 95 ? 'bg-green-600' :
-                                  patient.adherenceRate >= 85 ? 'bg-yellow-600' : 'bg-red-600'
+                                  client.activityCompletionRate >= 95 ? 'bg-green-600' :
+                                  client.activityCompletionRate >= 85 ? 'bg-yellow-600' : 'bg-red-600'
                                 }`}
-                                style={{ width: `${patient.adherenceRate}%` }}
+                                style={{ width: `${client.activityCompletionRate}%` }}
                               ></div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(patient.status)}`}>
-                            {getStatusText(patient.status)}
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(client.status)}`}>
+                            {getStatusText(client.status)}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex justify-end space-x-2">
                             <button
-                              onClick={() => setSelectedPatient(patient)}
-                              className="text-medical-600 hover:text-medical-900"
+                              onClick={() => setSelectedClient(client)}
+                              className="text-blue-600 hover:text-blue-900 transition-all"
                             >
                               <Eye className="w-4 h-4" />
                             </button>
-                            <button className="text-blue-600 hover:text-blue-900">
+                            <button className="text-blue-600 hover:text-blue-900 transition-all">
                               <Edit className="w-4 h-4" />
                             </button>
-                            <button className="text-red-600 hover:text-red-900">
+                            <button className="text-red-600 hover:text-red-900 transition-all">
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
@@ -530,15 +545,19 @@ const AdminDashboard: React.FC = () => {
         {/* Activity Tab */}
         {activeTab === 'activity' && (
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">Hoạt động hệ thống</h2>
+            <h2 className="text-xl font-semibold text-gray-900 fade-in">Hoạt động hệ thống</h2>
             
             <div className="space-y-4">
-              {mockRecentActivity.map(activity => (
-                <div key={activity.id} className="card">
+              {mockRecentActivity.map((activity, index) => (
+                <div 
+                  key={activity.id} 
+                  className="card bg-white shadow-md rounded-xl p-6 border border-gray-100 hover:shadow-lg transition-all slide-up"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
                   <div className="flex items-center space-x-4">
                     {getActivityIcon(activity.type)}
                     <div className="flex-1">
-                      <h3 className="text-lg font-medium text-gray-900">{activity.patient}</h3>
+                      <h3 className="text-lg font-medium text-gray-900">{activity.client}</h3>
                       <p className="text-gray-600">{activity.description}</p>
                       <div className="flex items-center mt-2 text-sm text-gray-500">
                         <Clock className="w-4 h-4 mr-1" />
@@ -558,11 +577,11 @@ const AdminDashboard: React.FC = () => {
         {/* Alerts Tab */}
         {activeTab === 'alerts' && (
           <div className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center fade-in">
               <h2 className="text-xl font-semibold text-gray-900">Cảnh báo hệ thống</h2>
               <button
                 onClick={() => setAlerts(alerts.map(alert => ({ ...alert, isRead: true })))}
-                className="btn btn-secondary"
+                className="btn btn-secondary bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition-all"
               >
                 <CheckCircle className="w-4 h-4 mr-2" />
                 Đánh dấu tất cả đã đọc
@@ -570,13 +589,14 @@ const AdminDashboard: React.FC = () => {
             </div>
             
             <div className="space-y-4">
-              {alerts.map(alert => (
+              {alerts.map((alert, index) => (
                 <div 
                   key={alert.id} 
-                  className={`card cursor-pointer transition-all hover:shadow-md ${
-                    !alert.isRead ? 'ring-2 ring-medical-200' : ''
+                  className={`card bg-white shadow-md rounded-xl p-6 border border-gray-100 cursor-pointer transition-all hover:shadow-lg slide-up ${
+                    !alert.isRead ? 'ring-2 ring-blue-200' : ''
                   }`}
                   onClick={() => markAlertAsRead(alert.id)}
+                  style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="flex items-start space-x-4">
                     {getAlertIcon(alert.type)}
@@ -584,7 +604,7 @@ const AdminDashboard: React.FC = () => {
                       <div className="flex items-center justify-between">
                         <h3 className="text-lg font-medium text-gray-900">{alert.title}</h3>
                         {!alert.isRead && (
-                          <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                          <div className="w-2 h-2 bg-red-500 rounded-full pulse"></div>
                         )}
                       </div>
                       <p className="text-gray-600 mt-1">{alert.message}</p>
@@ -602,31 +622,31 @@ const AdminDashboard: React.FC = () => {
 
         {/* Settings Tab */}
         {activeTab === 'settings' && (
-          <div className="space-y-6">
+          <div className="space-y-6 fade-in">
             <h2 className="text-xl font-semibold text-gray-900">Cài đặt hệ thống</h2>
             
-            <div className="card">
+            <div className="card bg-white shadow-md rounded-xl p-6 border border-gray-100 slide-up">
               <div className="text-center py-12">
-                <Settings className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">Cài đặt hệ thống sẽ được triển khai sớm</p>
+                <Settings className="w-12 h-12 text-blue-600 mx-auto mb-4 bounce-gentle" />
+                <p className="text-gray-600">Cài đặt hệ thống YOU ARE HEARD sẽ được triển khai sớm</p>
                 <p className="text-sm text-gray-500">Bao gồm cấu hình thông báo, sao lưu dữ liệu, và quản lý người dùng</p>
               </div>
             </div>
           </div>
         )}
 
-        {/* Patient Detail Modal */}
-        {selectedPatient && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg max-w-4xl w-full max-h-96 overflow-y-auto p-6">
+        {/* Client Detail Modal */}
+        {selectedClient && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 fade-in">
+            <div className="bg-white rounded-lg max-w-4xl w-full max-h-96 overflow-y-auto p-6 shadow-2xl slide-up">
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">{selectedPatient.name}</h3>
-                  <p className="text-gray-600">Chi tiết bệnh nhân</p>
+                  <h3 className="text-xl font-bold text-gray-900">{selectedClient.name}</h3>
+                  <p className="text-gray-600">Chi tiết khách hàng</p>
                 </div>
                 <button
-                  onClick={() => setSelectedPatient(null)}
-                  className="text-gray-400 hover:text-gray-600"
+                  onClick={() => setSelectedClient(null)}
+                  className="text-gray-400 hover:text-gray-600 transition-all"
                 >
                   ✕
                 </button>
@@ -637,18 +657,18 @@ const AdminDashboard: React.FC = () => {
                   <div>
                     <h4 className="font-medium text-gray-700 mb-2">Thông tin cá nhân</h4>
                     <div className="space-y-2 text-sm">
-                      <p><span className="font-medium">Email:</span> {selectedPatient.email}</p>
-                      <p><span className="font-medium">Điện thoại:</span> {selectedPatient.phone}</p>
-                      <p><span className="font-medium">Ngày sinh:</span> {format(new Date(selectedPatient.dateOfBirth), 'dd/MM/yyyy', { locale: vi })}</p>
+                      <p><span className="font-medium">Email:</span> {selectedClient.email}</p>
+                      <p><span className="font-medium">Điện thoại:</span> {selectedClient.phone}</p>
+                      <p><span className="font-medium">Ngày sinh:</span> {format(new Date(selectedClient.dateOfBirth), 'dd/MM/yyyy', { locale: vi })}</p>
                     </div>
                   </div>
                   
                   <div>
-                    <h4 className="font-medium text-gray-700 mb-2">Thông tin điều trị</h4>
+                    <h4 className="font-medium text-gray-700 mb-2">Thông tin trị liệu</h4>
                     <div className="space-y-2 text-sm">
-                      <p><span className="font-medium">Ngày chẩn đoán:</span> {format(new Date(selectedPatient.diagnosisDate), 'dd/MM/yyyy', { locale: vi })}</p>
-                      <p><span className="font-medium">Phác đồ hiện tại:</span> {selectedPatient.currentTreatment}</p>
-                      <p><span className="font-medium">Bác sĩ phụ trách:</span> {selectedPatient.assignedDoctor}</p>
+                      <p><span className="font-medium">Ngày đánh giá ban đầu:</span> {format(new Date(selectedClient.initialAssessmentDate), 'dd/MM/yyyy', { locale: vi })}</p>
+                      <p><span className="font-medium">Loại liệu pháp hiện tại:</span> {selectedClient.currentTherapyType}</p>
+                      <p><span className="font-medium">Nhà trị liệu phụ trách:</span> {selectedClient.assignedTherapist}</p>
                     </div>
                   </div>
                 </div>
@@ -657,40 +677,40 @@ const AdminDashboard: React.FC = () => {
                   <div>
                     <h4 className="font-medium text-gray-700 mb-2">Lịch hẹn</h4>
                     <div className="space-y-2 text-sm">
-                      <p><span className="font-medium">Lần khám cuối:</span> {format(new Date(selectedPatient.lastVisit), 'dd/MM/yyyy', { locale: vi })}</p>
-                      {selectedPatient.nextAppointment && (
-                        <p><span className="font-medium">Lịch hẹn tiếp theo:</span> {format(new Date(selectedPatient.nextAppointment), 'dd/MM/yyyy', { locale: vi })}</p>
+                      <p><span className="font-medium">Lần tư vấn cuối:</span> {format(new Date(selectedClient.lastSession), 'dd/MM/yyyy', { locale: vi })}</p>
+                      {selectedClient.nextSession && (
+                        <p><span className="font-medium">Lịch hẹn tiếp theo:</span> {format(new Date(selectedClient.nextSession), 'dd/MM/yyyy', { locale: vi })}</p>
                       )}
                     </div>
                   </div>
                   
                   <div>
-                    <h4 className="font-medium text-gray-700 mb-2">Tuân thủ điều trị</h4>
+                    <h4 className="font-medium text-gray-700 mb-2">Hoàn thành hoạt động</h4>
                     <div className="flex items-center space-x-3">
-                      <div className="text-2xl font-bold text-gray-900">{selectedPatient.adherenceRate}%</div>
+                      <div className="text-2xl font-bold text-gray-900">{selectedClient.activityCompletionRate}%</div>
                       <div className="flex-1 bg-gray-200 rounded-full h-3">
                         <div 
                           className={`h-3 rounded-full ${
-                            selectedPatient.adherenceRate >= 95 ? 'bg-green-600' :
-                            selectedPatient.adherenceRate >= 85 ? 'bg-yellow-600' : 'bg-red-600'
+                            selectedClient.activityCompletionRate >= 95 ? 'bg-green-600' :
+                            selectedClient.activityCompletionRate >= 85 ? 'bg-yellow-600' : 'bg-red-600'
                           }`}
-                          style={{ width: `${selectedPatient.adherenceRate}%` }}
+                          style={{ width: `${selectedClient.activityCompletionRate}%` }}
                         ></div>
                       </div>
                     </div>
                     <p className={`text-sm mt-1 ${
-                      selectedPatient.adherenceRate >= 95 ? 'text-green-600' :
-                      selectedPatient.adherenceRate >= 85 ? 'text-yellow-600' : 'text-red-600'
+                      selectedClient.activityCompletionRate >= 95 ? 'text-green-600' :
+                      selectedClient.activityCompletionRate >= 85 ? 'text-yellow-600' : 'text-red-600'
                     }`}>
-                      {selectedPatient.adherenceRate >= 95 ? 'Tuyệt vời' :
-                       selectedPatient.adherenceRate >= 85 ? 'Tốt' : 'Cần cải thiện'}
+                      {selectedClient.activityCompletionRate >= 95 ? 'Tuyệt vời' :
+                       selectedClient.activityCompletionRate >= 85 ? 'Tốt' : 'Cần cải thiện'}
                     </p>
                   </div>
                   
                   <div>
                     <h4 className="font-medium text-gray-700 mb-2">Trạng thái</h4>
-                    <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(selectedPatient.status)}`}>
-                      {getStatusText(selectedPatient.status)}
+                    <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(selectedClient.status)}`}>
+                      {getStatusText(selectedClient.status)}
                     </span>
                   </div>
                 </div>
@@ -698,12 +718,12 @@ const AdminDashboard: React.FC = () => {
               
               <div className="mt-8 flex justify-end space-x-3">
                 <button
-                  onClick={() => setSelectedPatient(null)}
-                  className="btn btn-secondary"
+                  onClick={() => setSelectedClient(null)}
+                  className="btn btn-secondary bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition-all"
                 >
                   Đóng
                 </button>
-                <button className="btn btn-primary">
+                <button className="btn btn-primary bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-2 px-4 rounded-lg transition-all">
                   Chỉnh sửa thông tin
                 </button>
               </div>

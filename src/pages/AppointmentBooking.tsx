@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Calendar, Clock, User, MapPin, Phone, CheckCircle, AlertCircle, Plus } from 'lucide-react'
+import { Calendar, Clock, User, MapPin, Phone, CheckCircle, AlertCircle, Plus, Brain, MessageCircle } from 'lucide-react'
 // import { useAuth } from '../contexts/AuthContext'  // Will be used for patient info later
 import { useNotifications } from '../contexts/NotificationContext'
 import { format, addDays, isSameDay, isBefore, startOfDay } from 'date-fns'
@@ -28,49 +28,48 @@ interface TimeSlot {
 const doctors: Doctor[] = [
   {
     id: '1',
-    name: 'BS. Nguyễn Văn Minh',
-    specialty: 'Bác sĩ Nhiễm Khuẩn',
+    name: 'ThS. Nguyễn Văn Minh',
+    specialty: 'Tâm lý trị liệu',
     experience: '15 năm kinh nghiệm',
     image: '/api/placeholder/100/100',
     rating: 4.9,
     availableDays: ['Thứ 2', 'Thứ 4', 'Thứ 6'],
     timeSlots: ['08:00', '09:00', '10:00', '14:00', '15:00', '16:00'],
-    location: 'Phòng khám 201',
+    location: 'Phòng tư vấn 201',
     phone: '0123-456-789',
-    email: 'bs.minh@hospital.vn'
+    email: 'ths.minh@youareheard.vn'
   },
   {
     id: '2',
-    name: 'BS. Trần Thị Lan',
-    specialty: 'Bác sĩ HIV/AIDS',
+    name: 'TS. Trần Thị Lan',
+    specialty: 'Tâm lý học lâm sàng',
     experience: '12 năm kinh nghiệm',
     image: '/api/placeholder/100/100',
     rating: 4.8,
     availableDays: ['Thứ 3', 'Thứ 5', 'Thứ 7'],
     timeSlots: ['08:30', '09:30', '10:30', '13:30', '14:30', '15:30'],
-    location: 'Phòng khám 203',
-    phone: '0123-456-790',
-    email: 'bs.lan@hospital.vn'
+    location: 'Phòng tư vấn 203',    phone: '0123-456-790',
+    email: 'ts.lan@youareheard.vn'
   },
   {
     id: '3',
-    name: 'BS. Lê Hoàng Nam',
-    specialty: 'Bác sĩ Nội Khoa',
+    name: 'ThS. Lê Hoàng Nam',
+    specialty: 'Tâm lý học trẻ em',
     experience: '18 năm kinh nghiệm',
     image: '/api/placeholder/100/100',
     rating: 4.7,
     availableDays: ['Thứ 2', 'Thứ 3', 'Thứ 5'],
     timeSlots: ['09:00', '10:00', '11:00', '14:00', '15:00'],
-    location: 'Phòng khám 205',
+    location: 'Phòng tư vấn 205',
     phone: '0123-456-791',
-    email: 'bs.nam@hospital.vn'
+    email: 'ths.nam@youareheard.vn'
   }
 ]
 
 const appointmentTypes = [
-  { id: 'routine', name: 'Khám định kỳ', duration: '30 phút', color: 'bg-blue-100 text-blue-800' },
-  { id: 'consultation', name: 'Tư vấn', duration: '45 phút', color: 'bg-green-100 text-green-800' },
-  { id: 'test', name: 'Xét nghiệm', duration: '20 phút', color: 'bg-yellow-100 text-yellow-800' },
+  { id: 'individual', name: 'Tư vấn cá nhân', duration: '45 phút', color: 'bg-ocean-100 text-ocean-800' },
+  { id: 'assessment', name: 'Đánh giá tâm lý', duration: '60 phút', color: 'bg-brand-100 text-brand-800' },
+  { id: 'followup', name: 'Tái khám', duration: '30 phút', color: 'bg-green-100 text-green-800' },
   { id: 'emergency', name: 'Khẩn cấp', duration: '60 phút', color: 'bg-red-100 text-red-800' }
 ]
 
@@ -182,46 +181,43 @@ const AppointmentBooking: React.FC = () => {
     setReason('')
     setNotes('')
   }
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Đặt lịch hẹn</h1>
-          <p className="mt-2 text-gray-600">Chọn bác sĩ và thời gian phù hợp cho cuộc hẹn của bạn</p>
+        <div className="mb-8 animate-fade-in">
+          <h1 className="text-3xl font-bold text-slate-900">Đặt lịch tư vấn</h1>
+          <p className="mt-2 text-slate-600">Chọn chuyên gia tâm lý và thời gian phù hợp cho buổi tư vấn của bạn</p>
         </div>
 
         {/* Progress Steps */}
-        <div className="mb-8">
+        <div className="mb-8 animate-fade-in" style={{animationDelay: '0.2s'}}>
           <div className="flex items-center justify-center">
             {[
-              { step: 1, title: 'Chọn bác sĩ' },
+              { step: 1, title: 'Chọn chuyên gia' },
               { step: 2, title: 'Chọn ngày' },
               { step: 3, title: 'Chọn giờ' },
               { step: 4, title: 'Thông tin' },
               { step: 5, title: 'Hoàn tất' }
             ].map((item, index) => (
-              <div key={item.step} className="flex items-center">
-                <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+              <div key={item.step} className="flex items-center">                <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300 ${
                   step >= item.step 
-                    ? 'bg-medical-500 border-medical-500 text-white' 
-                    : 'border-gray-300 text-gray-500'
+                    ? 'bg-brand-600 border-brand-600 text-white shadow-lg' 
+                    : 'border-slate-300 text-slate-500'
                 }`}>
                   {step > item.step ? (
-                    <CheckCircle className="w-6 h-6" />
+                    <CheckCircle className="w-6 h-6 animate-bounce-gentle" />
                   ) : (
                     <span className="text-sm font-medium">{item.step}</span>
                   )}
                 </div>
                 <span className={`ml-2 text-sm font-medium ${
-                  step >= item.step ? 'text-medical-600' : 'text-gray-500'
+                  step >= item.step ? 'text-brand-600' : 'text-slate-500'
                 }`}>
                   {item.title}
                 </span>
-                {index < 4 && (
-                  <div className={`w-12 h-0.5 mx-4 ${
-                    step > item.step ? 'bg-medical-500' : 'bg-gray-300'
+                {index < 4 && (                  <div className={`w-12 h-0.5 mx-4 ${
+                    step > item.step ? 'bg-brand-500' : 'bg-slate-300'
                   }`} />
                 )}
               </div>
@@ -231,25 +227,24 @@ const AppointmentBooking: React.FC = () => {
 
         {/* Step 1: Doctor Selection */}
         {step === 1 && (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">Chọn bác sĩ</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {doctors.map((doctor) => (
+          <div className="space-y-6 animate-fade-in">
+            <h2 className="text-xl font-semibold text-slate-900">Chọn chuyên gia tâm lý</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-stagger">
+              {doctors.map((doctor, index) => (
                 <div
                   key={doctor.id}
-                  className="card hover:shadow-lg transition-shadow cursor-pointer"
+                  className="card card-hover overflow-hidden cursor-pointer animate-slide-up"
+                  style={{animationDelay: `${index * 0.1}s`}}
                   onClick={() => handleDoctorSelect(doctor)}
                 >
                   <div className="flex items-center mb-4">
-                    <img
-                      src={doctor.image}
-                      alt={doctor.name}
-                      className="w-16 h-16 rounded-full bg-gray-200"
-                    />
+                    <div className="w-16 h-16 rounded-full bg-ocean-100 flex items-center justify-center">
+                      <Brain className="w-8 h-8 text-ocean-600" />
+                    </div>
                     <div className="ml-4">
-                      <h3 className="text-lg font-semibold text-gray-900">{doctor.name}</h3>
-                      <p className="text-medical-600">{doctor.specialty}</p>
-                      <p className="text-sm text-gray-600">{doctor.experience}</p>
+                      <h3 className="text-lg font-semibold text-slate-900">{doctor.name}</h3>
+                      <p className="text-ocean-600">{doctor.specialty}</p>
+                      <p className="text-sm text-slate-600">{doctor.experience}</p>
                     </div>
                   </div>
                   
@@ -285,9 +280,9 @@ const AppointmentBooking: React.FC = () => {
               <h2 className="text-xl font-semibold text-gray-900">Chọn ngày hẹn</h2>
               <button
                 onClick={() => setStep(1)}
-                className="text-medical-600 hover:text-medical-700"
+                className="text-ocean-600 hover:text-ocean-700"
               >
-                Đổi bác sĩ
+                Đổi chuyên gia
               </button>
             </div>
             
@@ -304,10 +299,8 @@ const AppointmentBooking: React.FC = () => {
                 ))}
               </div>
               
-              <div className="grid grid-cols-7 gap-2">
-                {calendarDays.map((date) => {
-                  const dayOfWeek = format(date, 'EEEE')
-                  const dayMapping: { [key: string]: string } = {
+              <div className="grid grid-cols-7 gap-2">                {calendarDays.map((date) => {
+                  const dayOfWeek = format(date, 'EEEE');                  const dayMapping: { [key: string]: string } = {
                     'Monday': 'Thứ 2',
                     'Tuesday': 'Thứ 3',
                     'Wednesday': 'Thứ 4',
@@ -328,9 +321,9 @@ const AppointmentBooking: React.FC = () => {
                       disabled={!isAvailable || isPast}
                       className={`p-3 text-sm rounded-lg transition-colors ${
                         isSelected
-                          ? 'bg-medical-500 text-white'
+                          ? 'bg-brand-500 text-white shadow-md'
                           : isAvailable && !isPast
-                          ? 'bg-white border border-gray-200 hover:bg-medical-50 text-gray-900'
+                          ? 'bg-white border border-gray-200 hover:bg-ocean-50 text-gray-900'
                           : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                       }`}
                     >
@@ -341,7 +334,7 @@ const AppointmentBooking: React.FC = () => {
               </div>
               
               <div className="mt-4 text-sm text-gray-600">
-                <p>Bác sĩ {selectedDoctor.name} có sẵn vào: {selectedDoctor.availableDays.join(', ')}</p>
+                <p>Chuyên gia {selectedDoctor.name} có sẵn vào: {selectedDoctor.availableDays.join(', ')}</p>
               </div>
             </div>
           </div>
@@ -354,7 +347,7 @@ const AppointmentBooking: React.FC = () => {
               <h2 className="text-xl font-semibold text-gray-900">Chọn giờ hẹn</h2>
               <button
                 onClick={() => setStep(2)}
-                className="text-medical-600 hover:text-medical-700"
+                className="text-ocean-600 hover:text-ocean-700"
               >
                 Đổi ngày
               </button>
@@ -373,9 +366,9 @@ const AppointmentBooking: React.FC = () => {
                     disabled={!available}
                     className={`p-3 rounded-lg text-sm font-medium transition-colors ${
                       selectedTime === time
-                        ? 'bg-medical-500 text-white'
+                        ? 'bg-brand-500 text-white shadow-md'
                         : available
-                        ? 'bg-white border border-gray-200 hover:bg-medical-50 text-gray-900'
+                        ? 'bg-white border border-gray-200 hover:bg-ocean-50 text-gray-900'
                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     }`}
                   >
@@ -390,7 +383,7 @@ const AppointmentBooking: React.FC = () => {
                   <p className="text-gray-600">Không có thời gian trống trong ngày này</p>
                   <button
                     onClick={() => setStep(2)}
-                    className="mt-2 text-medical-600 hover:text-medical-700"
+                    className="mt-2 text-ocean-600 hover:text-ocean-700"
                   >
                     Chọn ngày khác
                   </button>
@@ -404,10 +397,10 @@ const AppointmentBooking: React.FC = () => {
         {step === 4 && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">Thông tin cuộc hẹn</h2>
+              <h2 className="text-xl font-semibold text-gray-900">Thông tin buổi tư vấn</h2>
               <button
                 onClick={() => setStep(3)}
-                className="text-medical-600 hover:text-medical-700"
+                className="text-ocean-600 hover:text-ocean-700"
               >
                 Đổi giờ
               </button>
@@ -415,12 +408,12 @@ const AppointmentBooking: React.FC = () => {
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="card">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Chi tiết cuộc hẹn</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Chi tiết buổi tư vấn</h3>
                 
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Loại cuộc hẹn
+                      Loại buổi tư vấn
                     </label>
                     <div className="grid grid-cols-2 gap-3">
                       {appointmentTypes.map((type) => (
@@ -429,7 +422,7 @@ const AppointmentBooking: React.FC = () => {
                           onClick={() => setSelectedType(type.id)}
                           className={`p-3 rounded-lg border text-left transition-colors ${
                             selectedType === type.id
-                              ? 'border-medical-500 bg-medical-50'
+                              ? 'border-brand-500 bg-brand-50 shadow-md'
                               : 'border-gray-200 hover:border-gray-300'
                           }`}
                         >
@@ -448,8 +441,8 @@ const AppointmentBooking: React.FC = () => {
                       type="text"
                       value={reason}
                       onChange={(e) => setReason(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medical-500 focus:border-transparent"
-                      placeholder="Nhập lý do cần khám..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
+                      placeholder="Nhập lý do cần tư vấn..."
                     />
                   </div>
                   
@@ -461,8 +454,8 @@ const AppointmentBooking: React.FC = () => {
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medical-500 focus:border-transparent"
-                      placeholder="Thông tin thêm cho bác sĩ..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
+                      placeholder="Thông tin thêm cho chuyên gia..."
                     />
                   </div>
                 </div>
@@ -473,7 +466,7 @@ const AppointmentBooking: React.FC = () => {
                 
                 <div className="space-y-4">
                   <div className="flex items-center">
-                    <User className="w-5 h-5 text-gray-400 mr-3" />
+                    <User className="w-5 h-5 text-ocean-500 mr-3" />
                     <div>
                       <p className="font-medium text-gray-900">{selectedDoctor?.name}</p>
                       <p className="text-sm text-gray-600">{selectedDoctor?.specialty}</p>
@@ -481,7 +474,7 @@ const AppointmentBooking: React.FC = () => {
                   </div>
                   
                   <div className="flex items-center">
-                    <Calendar className="w-5 h-5 text-gray-400 mr-3" />
+                    <Calendar className="w-5 h-5 text-ocean-500 mr-3" />
                     <div>
                       <p className="font-medium text-gray-900">
                         {selectedDate && format(selectedDate, 'EEEE, dd MMMM yyyy', { locale: vi })}
@@ -490,14 +483,14 @@ const AppointmentBooking: React.FC = () => {
                   </div>
                   
                   <div className="flex items-center">
-                    <Clock className="w-5 h-5 text-gray-400 mr-3" />
+                    <Clock className="w-5 h-5 text-ocean-500 mr-3" />
                     <div>
                       <p className="font-medium text-gray-900">{selectedTime}</p>
                     </div>
                   </div>
                   
                   <div className="flex items-center">
-                    <MapPin className="w-5 h-5 text-gray-400 mr-3" />
+                    <MapPin className="w-5 h-5 text-ocean-500 mr-3" />
                     <div>
                       <p className="font-medium text-gray-900">{selectedDoctor?.location}</p>
                     </div>
@@ -516,7 +509,7 @@ const AppointmentBooking: React.FC = () => {
                 <button
                   onClick={handleSubmit}
                   disabled={!selectedType || isSubmitting}
-                  className="w-full mt-6 btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full mt-6 bg-gradient-to-r from-brand-600 to-ocean-600 hover:from-brand-700 hover:to-ocean-700 text-white py-3 px-4 rounded-lg font-medium shadow-md transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {isSubmitting ? 'Đang xử lý...' : 'Xác nhận đặt lịch'}
                 </button>
@@ -528,18 +521,18 @@ const AppointmentBooking: React.FC = () => {
         {/* Step 5: Confirmation */}
         {step === 5 && (
           <div className="max-w-2xl mx-auto text-center">
-            <div className="card">
-              <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-6" />
+            <div className="card animate-fade-in">
+              <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-6 animate-bounce-gentle" />
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Đặt lịch thành công!</h2>
               <p className="text-gray-600 mb-6">
-                Lịch hẹn của bạn đã được xác nhận. Chúng tôi sẽ gửi thông báo nhắc nhở trước cuộc hẹn.
+                Buổi tư vấn của bạn đã được xác nhận. Chúng tôi sẽ gửi thông báo nhắc nhở trước buổi tư vấn.
               </p>
               
-              <div className="bg-green-50 rounded-lg p-6 mb-6">
-                <h3 className="font-semibold text-gray-900 mb-4">Thông tin cuộc hẹn</h3>
+              <div className="bg-gradient-to-r from-brand-50 to-ocean-50 rounded-lg p-6 mb-6 shadow-inner animate-fade-in" style={{animationDelay: '0.3s'}}>
+                <h3 className="font-semibold text-gray-900 mb-4">Thông tin buổi tư vấn</h3>
                 <div className="space-y-2 text-left">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Bác sĩ:</span>
+                    <span className="text-gray-600">Chuyên gia:</span>
                     <span className="font-medium">{selectedDoctor?.name}</span>
                   </div>
                   <div className="flex justify-between">
@@ -559,17 +552,17 @@ const AppointmentBooking: React.FC = () => {
                 </div>
               </div>
               
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center animate-fade-in" style={{animationDelay: '0.5s'}}>
                 <button
                   onClick={resetBooking}
-                  className="btn btn-secondary"
+                  className="btn border border-ocean-600 text-ocean-600 hover:bg-ocean-50 py-3 px-5 rounded-lg font-medium transition-colors"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Đặt lịch khác
                 </button>
                 <button
                   onClick={() => window.location.href = '/dashboard'}
-                  className="btn btn-primary"
+                  className="btn bg-gradient-to-r from-brand-600 to-ocean-600 hover:from-brand-700 hover:to-ocean-700 text-white py-3 px-5 rounded-lg font-medium shadow-md transition-all transform hover:scale-[1.02]"
                 >
                   Về trang chủ
                 </button>

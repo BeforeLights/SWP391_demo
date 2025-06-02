@@ -3,7 +3,8 @@ import {
   Calendar, Clock, Activity, TrendingUp, FileText,
   User, Heart, Brain, Smile, MessageSquare,
   ChevronLeft, ChevronRight, Download,
-  Eye, Edit, Trash2, Plus, Sparkles, Sun, Frown, Meh
+  Eye, Edit, Trash2, Plus, Sparkles, Sun, Frown, Meh,
+  CheckCircle, X
 } from 'lucide-react'
 import { format, subMonths, addMonths } from 'date-fns'
 import { vi } from 'date-fns/locale'
@@ -338,26 +339,12 @@ const MentalHealthHistory: React.FC = () => {
 
         {/* Tabs */}
         <div className="flex space-x-1 border-b border-gray-200 mb-6 animate-fade-in rounded-t-xl bg-gradient-to-r from-slate-50 to-white p-1" style={{animationDelay: '0.2s'}}>
-          {{
-            id: 'timeline',
-            label: 'Dòng thời gian',
-            icon: Clock
-          },
-          {
-            id: 'metrics',
-            label: 'Chỉ số',
-            icon: Activity
-          },
-          {
-            id: 'sessions',
-            label: 'Buổi trị liệu',
-            icon: Calendar
-          },
-          {
-            id: 'activities',
-            label: 'Hoạt động',
-            icon: Sparkles
-          }}.map(tab => (
+          {[
+            { id: 'timeline', label: 'Dòng thời gian', icon: Clock },
+            { id: 'metrics', label: 'Chỉ số', icon: Activity },
+            { id: 'sessions', label: 'Buổi trị liệu', icon: Calendar },
+            { id: 'activities', label: 'Hoạt động', icon: Sparkles }
+          ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
@@ -367,7 +354,9 @@ const MentalHealthHistory: React.FC = () => {
                   : 'text-slate-600 hover:bg-slate-100 hover:text-ocean-600'
               }`}
             >
-              <tab.icon className={`h-4 w-4 mr-2 ${activeTab === tab.id ? 'animate-pulse' : ''}`} />
+              {React.createElement(tab.icon, { 
+                className: `h-4 w-4 mr-2 ${activeTab === tab.id ? 'animate-pulse' : ''}` 
+              })}
               {tab.label}
             </button>
           ))}

@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { Eye, EyeOff, Heart } from 'lucide-react'
+import { Eye, EyeOff, Brain, Sparkles } from 'lucide-react'
 
 const SignUp: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +17,11 @@ const SignUp: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [animationVisible, setAnimationVisible] = useState(false)
+  
+  useEffect(() => {
+    setAnimationVisible(true)
+  }, [])
   
   const { user, register } = useAuth()
 
@@ -56,32 +61,35 @@ const SignUp: React.FC = () => {
       [e.target.name]: e.target.value
     })
   }
-
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <Heart className="h-12 w-12 text-medical-600" />
+    <div className="min-h-screen hero-bg flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md fade-in">
+        <div className="flex justify-center items-center space-x-2">
+          <Brain className="h-12 w-12 text-brand-600" />
+          <Sparkles className="h-8 w-8 text-ocean-600 animate-pulse" />
         </div>
-        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-          Tạo tài khoản mới
+        <h2 className="mt-6 text-center text-3xl font-bold gradient-text">
+          YOU ARE HEARD
         </h2>
+        <p className="mt-2 text-center text-sm text-gray-600">
+          Tạo tài khoản để bắt đầu hành trình chăm sóc sức khỏe tinh thần
+        </p>
         <p className="mt-2 text-center text-sm text-gray-600">
           Hoặc{' '}
           <Link
             to="/signin"
-            className="font-medium text-medical-600 hover:text-medical-500"
+            className="font-medium text-ocean-600 hover:text-ocean-500 gradient-text-hover"
           >
             đăng nhập với tài khoản có sẵn
           </Link>
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md fade-in" style={{ animationDelay: '200ms' }}>
+        <div className="bg-white py-8 px-4 shadow-lg rounded-2xl sm:px-10 border border-slate-100">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
                 {error}
               </div>
             )}
@@ -224,31 +232,29 @@ const SignUp: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center">
-              <input
+            <div className="flex items-center">              <input
                 id="terms"
                 name="terms"
                 type="checkbox"
                 required
-                className="h-4 w-4 text-medical-600 focus:ring-medical-500 border-gray-300 rounded"
+                className="h-4 w-4 text-ocean-600 focus:ring-ocean-500 border-gray-300 rounded"
               />
               <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
                 Tôi đồng ý với{' '}
-                <a href="#" className="text-medical-600 hover:text-medical-500">
+                <a href="#" className="text-ocean-600 hover:text-ocean-500 gradient-text-hover">
                   điều khoản sử dụng
                 </a>{' '}
                 và{' '}
-                <a href="#" className="text-medical-600 hover:text-medical-500">
+                <a href="#" className="text-ocean-600 hover:text-ocean-500 gradient-text-hover">
                   chính sách bảo mật
                 </a>
               </label>
             </div>
 
-            <div>
-              <button
+            <div>              <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-medical-600 hover:bg-medical-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-medical-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary w-full flex justify-center items-center"
               >
                 {loading ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>

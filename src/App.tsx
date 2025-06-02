@@ -7,13 +7,13 @@ import HomePage from './pages/HomePage'
 import BlogPage from './pages/BlogPage'
 import Dashboard from './pages/Dashboard'
 import ReportsPage from './pages/ReportsPage'
-import MedicationReminders from './pages/MedicationReminders'
-import PatientHistory from './pages/PatientHistory'
+import MentalHealthActivities from './pages/MentalHealthActivities'
+import MentalHealthHistory from './pages/MentalHealthHistory'
 import NotificationsCenter from './pages/NotificationsCenter'
 import SignIn from './pages/auth/SignIn'
 import SignUp from './pages/auth/SignUp'
 import AppointmentBooking from './pages/AppointmentBooking'
-import DoctorManagement from './pages/admin/DoctorManagement'
+import TherapistManagement from './pages/admin/TherapistManagement'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 
@@ -46,11 +46,11 @@ function App() {
                 </ProtectedRoute>
               } />              <Route path="/medications" element={
                 <ProtectedRoute>
-                  <MedicationReminders />
-                </ProtectedRoute>
-              } />              <Route path="/history" element={
+                  <MentalHealthActivities />
+                </ProtectedRoute>              } />
+              <Route path="/history" element={
                 <ProtectedRoute>
-                  <PatientHistory />
+                  <MentalHealthHistory />
                 </ProtectedRoute>
               } />
               <Route path="/notifications" element={
@@ -63,10 +63,9 @@ function App() {
                 <ProtectedRoute requiredRole="admin">
                   <AdminDashboard />
                 </ProtectedRoute>
-              } />
-              <Route path="/admin/doctors" element={
+              } />              <Route path="/admin/therapists" element={
                 <ProtectedRoute requiredRole="admin">
-                  <DoctorManagement />
+                  <TherapistManagement />
                 </ProtectedRoute>
               } />
             </Routes>
